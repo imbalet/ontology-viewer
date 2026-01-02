@@ -7,7 +7,7 @@ export interface Node {
     properties: {
         [key: string]: any;
     };
-    position?: { x: number; y: number };
+    position: { x: number; y: number };
 }
 
 export interface Edge {

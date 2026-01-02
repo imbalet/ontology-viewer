@@ -19,19 +19,45 @@ interface OntologyState {
     selectEdge: (edgeId?: EdgeId) => void;
 }
 
+const withPosition = (node: Node): Node => ({
+    ...node,
+    position: node.position ?? {
+        x: Math.random() * 400,
+        y: Math.random() * 400,
+    },
+});
+
+
 export const useOntologyStore = create<OntologyState>((set) => ({
     ontology: null,
     selectedNodeId: undefined,
     selectedEdgeId: undefined,
 
-    loadOntology: (data) => set({ ontology: data }),
+    loadOntology: (data) =>
+        set({
+            ontology: {
+                ...data,
+                nodes: data.nodes.map(withPosition),
+            },
+        }),
 
     addNode: (node) =>
-        set((state) => ({
-            ontology: state.ontology
-                ? { ...state.ontology, nodes: [...state.ontology.nodes, node] }
-                : { schema: { nodeFields: [], edgeTypes: {} }, nodes: [node], edges: [] },
-        })),
+        set((state) => {
+            const nodeWithPosition: Node = withPosition(node);
+
+            return {
+                ontology: state.ontology
+                    ? {
+                        ...state.ontology,
+                        nodes: [...state.ontology.nodes, nodeWithPosition],
+                    }
+                    : {
+                        schema: { nodeFields: [], edgeTypes: {} },
+                        nodes: [nodeWithPosition],
+                        edges: [],
+                    },
+            };
+        }),
 
     updateNode: (node) =>
         set((state) => ({
