@@ -14,6 +14,8 @@ interface OntologyState {
 
     addEdge: (edge: Edge) => void;
     removeEdge: (edgeId: EdgeId) => void;
+    updateEdge: (edge: Edge) => void;
+
 
     selectNode: (nodeId?: NodeId) => void;
     selectEdge: (edgeId?: EdgeId) => void;
@@ -109,6 +111,19 @@ export const useOntologyStore = create<OntologyState>((set) => ({
                 ? { ...state.ontology, edges: state.ontology.edges.filter((e) => e.id !== edgeId) }
                 : state.ontology,
         })),
+
+    updateEdge: (edge) =>
+        set((state) => ({
+            ontology: state.ontology
+                ? {
+                    ...state.ontology,
+                    edges: state.ontology.edges.map((e) =>
+                        e.id === edge.id ? edge : e
+                    ),
+                }
+                : state.ontology,
+        })),
+
 
     selectNode: (nodeId) => set({ selectedNodeId: nodeId, selectedEdgeId: undefined }),
     selectEdge: (edgeId) => set({ selectedEdgeId: edgeId, selectedNodeId: undefined }),
