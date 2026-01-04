@@ -101,6 +101,15 @@ export const GraphView: React.FC = () => {
         });
     };
 
+    const onPaneContextMenu = (event: React.MouseEvent) => {
+        event.preventDefault();
+
+        openContextMenu('pane', null, {
+            x: event.clientX,
+            y: event.clientY,
+        });
+    };
+
 
 
     return (
@@ -118,6 +127,7 @@ export const GraphView: React.FC = () => {
                         onEdgeClick={onEdgeClick}
                         onNodeContextMenu={onNodeContextMenu}
                         onEdgeContextMenu={onEdgeContextMenu}
+                        onPaneContextMenu={onPaneContextMenu}
                         onPaneClick={closeContextMenu}
                         onConnect={onConnect}
                         onNodeDragStop={onNodeDragStop}

@@ -23,8 +23,8 @@ interface OntologyState {
     contextMenu: ContextMenuState | null;
 
     openContextMenu: (
-        type: 'node' | 'edge',
-        targetId: string,
+        type: 'node' | 'edge' | 'pane',
+        targetId: string | null,
         position: { x: number; y: number }
     ) => void;
 
@@ -32,8 +32,8 @@ interface OntologyState {
 }
 
 interface ContextMenuState {
-    type: 'node' | 'edge' | null;
-    targetId?: string;
+    type: 'node' | 'edge' | 'pane' | null;
+    targetId?: string | null;
     position?: { x: number; y: number };
 }
 

@@ -1,15 +1,25 @@
 import React from 'react';
 import { useOntologyStore } from '../../state/useOntologyStore';
+import { useReactFlow } from 'reactflow';
+import { createEmptyNode } from '../../utils/createNode';
+import { generateId } from '../../utils/id';
 
 export const ContextMenu: React.FC = () => {
     const contextMenu = useOntologyStore((s) => s.contextMenu);
     const closeMenu = useOntologyStore((s) => s.closeContextMenu);
     const removeNode = useOntologyStore((s) => s.removeNode);
     const removeEdge = useOntologyStore((s) => s.removeEdge);
+    const addNode = useOntologyStore((s) => s.addNode);
+    // const setSelectedNodeId = useOntologyStore((s) => s.setSelectedNodeId);
+    const ontology = useOntologyStore((s) => s.ontology);
+
+    const { project } = useReactFlow();
 
     if (!contextMenu) return null;
+    if (!ontology) return null;
 
     const { type, targetId, position } = contextMenu;
+
 
     const handleDelete = () => {
         if (!targetId) return;
@@ -17,6 +27,19 @@ export const ContextMenu: React.FC = () => {
         if (type === 'node') removeNode(targetId);
         if (type === 'edge') removeEdge(targetId);
 
+        closeMenu();
+    };
+
+    const handleCreateNode = () => {
+        if (!position) return;
+
+        const graphPos = project(position);
+        const id = generateId('node');
+
+        const node = createEmptyNode(id, ontology.schema.nodeFields, graphPos);
+
+        addNode(node);
+        // setSelectedNodeId(id);
         closeMenu();
     };
 
@@ -33,7 +56,12 @@ export const ContextMenu: React.FC = () => {
             }}
             onMouseLeave={closeMenu}
         >
-            <button onClick={handleDelete}>🗑 Delete {type}</button>
+            {type === 'pane' && (
+                <button onClick={handleCreateNode}>+ Create Node</button>
+            )}
+            {(type === 'node' || type === 'edge') && (
+                <button onClick={handleDelete}>🗑 Delete {type}</button>
+            )}
         </div>
     );
 };
