@@ -12,6 +12,8 @@ import ReactFlow, {
 import 'reactflow/dist/style.css';
 import type { Edge } from '../../models/ontology';
 import { useOntologyStore } from '../../state/useOntologyStore';
+import { ContextMenu } from '../ContextMenu/ContextMenu';
+
 
 export const GraphView: React.FC = () => {
     const ontology = useOntologyStore((s) => s.ontology);
@@ -19,6 +21,10 @@ export const GraphView: React.FC = () => {
     const selectEdge = useOntologyStore((s) => s.selectEdge);
     const addEdgeToStore = useOntologyStore((s) => s.addEdge);
     const updateNode = useOntologyStore((s) => s.updateNode);
+
+    const openContextMenu = useOntologyStore((s) => s.openContextMenu);
+    const closeContextMenu = useOntologyStore((s) => s.closeContextMenu);
+
 
     const [nodes, setNodes, onNodesChange] = useNodesState([]);
     const [edges, setEdges, onEdgesChange] = useEdgesState([]);
@@ -68,6 +74,24 @@ export const GraphView: React.FC = () => {
         addEdgeToStore(newEdge);
     };
 
+    const onNodeContextMenu = (_event: React.MouseEvent, node: RFNode) => {
+        _event.preventDefault();
+        openContextMenu('node', node.id, {
+            x: _event.clientX,
+            y: _event.clientY,
+        });
+    };
+
+    const onEdgeContextMenu = (_event: React.MouseEvent, edge: RFEdge) => {
+        _event.preventDefault();
+        openContextMenu('edge', edge.id, {
+            x: _event.clientX,
+            y: _event.clientY,
+        });
+    };
+
+
+
     return (
         <ReactFlowProvider>
             <div style={{ width: '100%', height: '600px', border: '1px solid #ccc' }}>
@@ -81,6 +105,9 @@ export const GraphView: React.FC = () => {
                         onEdgesChange={onEdgesChange}
                         onNodeClick={onNodeClick}
                         onEdgeClick={onEdgeClick}
+                        onNodeContextMenu={onNodeContextMenu}
+                        onEdgeContextMenu={onEdgeContextMenu}
+                        onPaneClick={closeContextMenu}
                         onConnect={onConnect}
                         onNodeDragStop={onNodeDragStop}
                         fitView
@@ -91,6 +118,7 @@ export const GraphView: React.FC = () => {
                     </ReactFlow>
                 )}
             </div>
+            <ContextMenu />
         </ReactFlowProvider>
     );
 

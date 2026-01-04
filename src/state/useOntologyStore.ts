@@ -17,6 +17,22 @@ interface OntologyState {
 
     selectNode: (nodeId?: NodeId) => void;
     selectEdge: (edgeId?: EdgeId) => void;
+
+    contextMenu: ContextMenuState | null;
+
+    openContextMenu: (
+        type: 'node' | 'edge',
+        targetId: string,
+        position: { x: number; y: number }
+    ) => void;
+
+    closeContextMenu: () => void;
+}
+
+interface ContextMenuState {
+    type: 'node' | 'edge' | null;
+    targetId?: string;
+    position?: { x: number; y: number };
 }
 
 const withPosition = (node: Node): Node => ({
@@ -96,4 +112,14 @@ export const useOntologyStore = create<OntologyState>((set) => ({
 
     selectNode: (nodeId) => set({ selectedNodeId: nodeId, selectedEdgeId: undefined }),
     selectEdge: (edgeId) => set({ selectedEdgeId: edgeId, selectedNodeId: undefined }),
+
+    // context menu
+    contextMenu: null,
+    openContextMenu: (type, targetId, position) =>
+        set({
+            contextMenu: { type, targetId, position },
+        }),
+
+    closeContextMenu: () => set({ contextMenu: null }),
+
 }));
