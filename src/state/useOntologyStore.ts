@@ -3,8 +3,8 @@ import type { Ontology, Node, Edge, NodeId, EdgeId } from '../models/ontology';
 
 interface OntologyState {
     ontology: Ontology | null;
-    selectedNodeId?: NodeId;
-    selectedEdgeId?: EdgeId;
+    selectedNodeId: NodeId | null;
+    selectedEdgeId: EdgeId | null;
 
     // actions
     loadOntology: (data: Ontology) => void;
@@ -48,8 +48,8 @@ const withPosition = (node: Node): Node => ({
 
 export const useOntologyStore = create<OntologyState>((set) => ({
     ontology: null,
-    selectedNodeId: undefined,
-    selectedEdgeId: undefined,
+    selectedNodeId: null,
+    selectedEdgeId: null,
 
     loadOntology: (data) =>
         set({

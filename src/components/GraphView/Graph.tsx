@@ -25,6 +25,9 @@ export const GraphView: React.FC = () => {
     const openContextMenu = useOntologyStore((s) => s.openContextMenu);
     const closeContextMenu = useOntologyStore((s) => s.closeContextMenu);
 
+    const selectedNodeId = useOntologyStore((s) => s.selectedNodeId);
+    const selectedEdgeId = useOntologyStore((s) => s.selectedEdgeId);
+
 
     const [nodes, setNodes, onNodesChange] = useNodesState([]);
     const [edges, setEdges, onEdgesChange] = useEdgesState([]);
@@ -39,13 +42,14 @@ export const GraphView: React.FC = () => {
                 type: 'default',
                 data: { label: n.properties.name || n.id },
                 position: n.position,
+                selected: n.id === selectedNodeId,
             }))
         );
 
-
         setEdges(
             ontology.edges.map((e) => {
-                const style = getEdgeStyle(e.type);
+                const base = getEdgeStyle(e.type);
+                const isSelected = e.id === selectedEdgeId;
 
                 return {
                     id: e.id,
@@ -53,11 +57,21 @@ export const GraphView: React.FC = () => {
                     target: e.target,
                     label: e.type,
                     animated: e.type === 'requires',
-                    ...style,
+                    ...base,
+                    selected: isSelected,
+                    style: isSelected
+                        ? {
+                            ...base.style,
+                            strokeWidth: (Number(base.style?.strokeWidth) || 2) + 1,
+                        }
+                        : base.style,
+                    labelStyle: isSelected
+                        ? { fontWeight: 'bold', fill: '#f00', fontSize: 14 }
+                        : undefined,
                 };
             })
         );
-    }, [ontology]);
+    }, [ontology, selectedNodeId, selectedEdgeId]);
 
     const onNodeDragStop = (_event: any, node: RFNode) => {
         const n = ontology?.nodes.find((n) => n.id === node.id);
