@@ -14,7 +14,7 @@ export interface Edge {
     id: EdgeId;
     source: NodeId;
     target: NodeId;
-    type: 'includes' | 'requires' | 'related_to';
+    type: string;
     properties?: {
         [key: string]: any;
     };
