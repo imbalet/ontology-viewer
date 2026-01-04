@@ -76,6 +76,17 @@ export const GraphView: React.FC = () => {
         const edgeTypes = Object.keys(ontology.schema.edgeTypes);
         const defaultType = edgeTypes[0] || 'related_to';
 
+        const exists = ontology.edges.some(
+            (e) =>
+                e.source === params.source &&
+                e.target === params.target
+        );
+
+        if (exists) {
+            console.warn('Edge already exists:', params.source, '→', params.target);
+            return;
+        }
+
         addEdgeToStore({
             id: `e-${params.source}-${params.target}-${Date.now()}`,
             source: params.source,
@@ -83,6 +94,7 @@ export const GraphView: React.FC = () => {
             type: defaultType,
         });
     };
+
 
 
     const onNodeContextMenu = (_event: React.MouseEvent, node: RFNode) => {
