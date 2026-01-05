@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import type { Ontology, Node, Edge, NodeId, EdgeId } from '../models/ontology';
+import { applyAutoLayout } from '../utils/layout';
 
 interface ContextMenuState {
   type: 'node' | 'edge' | 'pane' | null;
@@ -40,11 +41,9 @@ interface OntologyState {
   redo: () => void;
 }
 
-// helper: assign position if missing
-const withPosition = (node: Node): Node => ({
-  ...node,
-  position: node.position ?? { x: Math.random() * 400, y: Math.random() * 400 },
-});
+const hasAllPositions = (nodes: Node[]) =>
+  nodes.every((n) => n.position && typeof n.position.x === 'number');
+
 
 // helper: push current ontology to undo stack
 const pushHistory = (state: OntologyState, newOntology: Ontology) => ({
@@ -61,19 +60,38 @@ export const useOntologyStore = create<OntologyState>((set) => ({
   redoStack: [],
 
   loadOntology: (data) =>
-    set({
-      ontology: { ...data, nodes: data.nodes.map(withPosition) },
-      undoStack: [],
-      redoStack: [],
+    set(() => {
+      const nodesHavePositions = hasAllPositions(data.nodes);
+
+      const nodes = nodesHavePositions
+        ? data.nodes
+        : applyAutoLayout(
+          data.nodes.map((n) => ({
+            ...n,
+            position: { x: 0, y: 0 },
+          })),
+          data.edges
+        );
+
+      return {
+        ontology: { ...data, nodes },
+        undoStack: [],
+        redoStack: [],
+      };
     }),
 
   addNode: (node) =>
     set((state) => {
       if (!state.ontology) return state;
-      const nodeWithPos = withPosition(node);
+
+      const newNode: Node = {
+        ...node,
+        position: node.position ?? { x: 0, y: 0 },
+      };
+
       const newOntology: Ontology = {
         ...state.ontology,
-        nodes: [...state.ontology.nodes, nodeWithPos],
+        nodes: [...state.ontology.nodes, newNode],
       };
       return { ...state, ...pushHistory(state, newOntology) };
     }),
