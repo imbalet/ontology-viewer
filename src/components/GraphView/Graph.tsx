@@ -107,30 +107,12 @@ export const GraphView: React.FC = () => {
     });
   };
 
-  const onNodeContextMenu = (_event: React.MouseEvent, node: RFNode) => {
-    _event.preventDefault();
-    openContextMenu('node', node.id, {
-      x: _event.clientX,
-      y: _event.clientY,
-    });
-  };
-
-  const onEdgeContextMenu = (_event: React.MouseEvent, edge: RFEdge) => {
-    _event.preventDefault();
-    openContextMenu('edge', edge.id, {
-      x: _event.clientX,
-      y: _event.clientY,
-    });
-  };
-
-  const onPaneContextMenu = (event: React.MouseEvent) => {
-    event.preventDefault();
-
-    openContextMenu('pane', null, {
-      x: event.clientX,
-      y: event.clientY,
-    });
-  };
+  function handleContextMenu(type: 'node' | 'edge' | 'pane', id: string | null) {
+    return (event: React.MouseEvent) => {
+      event.preventDefault();
+      openContextMenu(type, id, { x: event.clientX, y: event.clientY });
+    };
+  }
 
   const onPaneClick = () => {
     selectNode(undefined);
@@ -151,9 +133,9 @@ export const GraphView: React.FC = () => {
             onEdgesChange={onEdgesChange}
             onNodeClick={onNodeClick}
             onEdgeClick={onEdgeClick}
-            onNodeContextMenu={onNodeContextMenu}
-            onEdgeContextMenu={onEdgeContextMenu}
-            onPaneContextMenu={onPaneContextMenu}
+            onNodeContextMenu={(event, node) => handleContextMenu('node', node.id)(event)}
+            onEdgeContextMenu={(event, edge) => handleContextMenu('edge', edge.id)(event)}
+            onPaneContextMenu={(event) => handleContextMenu('pane', null)(event)}
             onPaneClick={onPaneClick}
             onConnect={onConnect}
             onNodeDragStop={onNodeDragStop}
@@ -166,6 +148,6 @@ export const GraphView: React.FC = () => {
         )}
       </div>
       <ContextMenu />
-    </ReactFlowProvider>
+    </ReactFlowProvider >
   );
 };

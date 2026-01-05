@@ -53,7 +53,6 @@ export const ContextMenu: React.FC = () => {
         padding: '6px',
         zIndex: 1000,
       }}
-      onMouseLeave={closeMenu}
     >
       {type === 'pane' && <button onClick={handleCreateNode}>+ Create Node</button>}
       {(type === 'node' || type === 'edge') && (
