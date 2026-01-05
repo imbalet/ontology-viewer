@@ -22,6 +22,8 @@ export const GraphView: React.FC = () => {
   const selectEdge = useOntologyStore((s) => s.selectEdge);
   const addEdgeToStore = useOntologyStore((s) => s.addEdge);
   const updateNode = useOntologyStore((s) => s.updateNode);
+  const removeNode = useOntologyStore((s) => s.removeNode);
+  const removeEdge = useOntologyStore((s) => s.removeEdge);
 
   const openContextMenu = useOntologyStore((s) => s.openContextMenu);
   const closeContextMenu = useOntologyStore((s) => s.closeContextMenu);
@@ -73,6 +75,49 @@ export const GraphView: React.FC = () => {
       )
     );
   }, [ontology, selectedNodeId, selectedEdgeId]);
+
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      const el = e.target as HTMLElement | null;
+      if (
+        el &&
+        (el.tagName === 'INPUT' ||
+          el.tagName === 'TEXTAREA' ||
+          el.isContentEditable)
+      ) {
+        return;
+      }
+
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        selectNode(undefined);
+        selectEdge(undefined);
+        closeContextMenu();
+        return;
+      }
+
+      if (e.key !== 'Delete' && e.key !== 'Backspace') return;
+
+      if (selectedNodeId) {
+        e.preventDefault();
+        const ok = window.confirm(
+          'Delete selected node? All connected edges will be removed.'
+        );
+        if (ok) removeNode(selectedNodeId);
+        return;
+      }
+
+      if (selectedEdgeId) {
+        e.preventDefault();
+        const ok = window.confirm('Delete selected edge?');
+        if (ok) removeEdge(selectedEdgeId);
+      }
+    };
+
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [selectedNodeId, selectedEdgeId, removeNode, removeEdge]);
 
 
   const onNodeDragStop = (_event: any, node: RFNode) => {

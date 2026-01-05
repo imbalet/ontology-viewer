@@ -23,11 +23,20 @@ export const ContextMenu: React.FC = () => {
   const handleDelete = () => {
     if (!targetId) return;
 
+    const label =
+      type === 'node'
+        ? 'узел (и все связанные рёбра)'
+        : 'ребро';
+
+    const ok = window.confirm(`Удалить ${label}?`);
+    if (!ok) return;
+
     if (type === 'node') removeNode(targetId);
     if (type === 'edge') removeEdge(targetId);
 
     closeMenu();
   };
+
 
   const handleCreateNode = () => {
     if (!position) return;
