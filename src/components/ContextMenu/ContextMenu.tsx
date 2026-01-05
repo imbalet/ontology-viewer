@@ -1,7 +1,7 @@
 import React from 'react';
 import { useOntologyStore } from '../../state/useOntologyStore';
 import { useReactFlow } from 'reactflow';
-import { createEmptyNode } from '../../utils/createNode';
+import { createEmptyNode } from '../../models/createNode';
 import { generateId } from '../../utils/id';
 
 export const ContextMenu: React.FC = () => {

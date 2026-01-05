@@ -1,4 +1,4 @@
-import type { Node, SchemaField } from '../models/ontology';
+import type { Node, SchemaField } from './ontology';
 
 export function createEmptyNode(
   id: string,

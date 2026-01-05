@@ -1,4 +1,4 @@
-import { type SchemaField } from '../models/ontology';
+import { type SchemaField } from './ontology';
 
 export function validateField(field: SchemaField, value: any): string | null {
   if (field.required) {

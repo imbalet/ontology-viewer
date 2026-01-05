@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { useOntologyStore } from '../../state/useOntologyStore';
 import { type SchemaField } from '../../models/ontology';
-import { validateField } from '../../utils/validation';
+import { validateField } from '../../models/validation';
 
 export const EdgeForm: React.FC = () => {
   const ontology = useOntologyStore((s) => s.ontology);
