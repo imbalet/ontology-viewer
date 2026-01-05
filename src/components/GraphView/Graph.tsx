@@ -13,6 +13,8 @@ import 'reactflow/dist/style.css';
 import { useOntologyStore } from '../../state/useOntologyStore';
 import { ContextMenu } from '../ContextMenu/ContextMenu';
 import { getEdgeStyle } from './edgeStyles';
+import { getNodeStyle } from './nodeStyles';
+import { getHighlights } from './highlightUtils';
 
 export const GraphView: React.FC = () => {
   const ontology = useOntologyStore((s) => s.ontology);
@@ -32,8 +34,17 @@ export const GraphView: React.FC = () => {
 
   const hasOntology = ontology !== null;
 
+
   useEffect(() => {
     if (!ontology) return;
+
+    const { highlightedNodes, highlightedEdges } = getHighlights(
+      ontology.nodes,
+      ontology.edges,
+      selectedNodeId,
+      selectedEdgeId
+    );
+
     setNodes(
       ontology.nodes.map((n) => ({
         id: n.id,
@@ -41,33 +52,28 @@ export const GraphView: React.FC = () => {
         data: { label: n.properties.name || n.id },
         position: n.position,
         selected: n.id === selectedNodeId,
+        style: getNodeStyle({
+          selected: n.id === selectedNodeId,
+          highlighted: highlightedNodes.has(n.id),
+        }),
       }))
     );
 
     setEdges(
-      ontology.edges.map((e) => {
-        const base = getEdgeStyle(e.type);
-        const isSelected = e.id === selectedEdgeId;
-
-        return {
-          id: e.id,
-          source: e.source,
-          target: e.target,
-          label: e.type,
-          animated: e.type === 'requires',
-          ...base,
-          selected: isSelected,
-          style: isSelected
-            ? {
-                ...base.style,
-                strokeWidth: (Number(base.style?.strokeWidth) || 2) + 1,
-              }
-            : base.style,
-          labelStyle: isSelected ? { fontWeight: 'bold', fill: '#f00', fontSize: 14 } : undefined,
-        };
-      })
+      ontology.edges.map((e) =>
+      ({
+        id: e.id,
+        source: e.source,
+        target: e.target,
+        ...getEdgeStyle(e.type, {
+          selected: e.id === selectedEdgeId,
+          highlighted: highlightedEdges.has(e.id),
+        }),
+      } as any)
+      )
     );
   }, [ontology, selectedNodeId, selectedEdgeId]);
+
 
   const onNodeDragStop = (_event: any, node: RFNode) => {
     const n = ontology?.nodes.find((n) => n.id === node.id);
