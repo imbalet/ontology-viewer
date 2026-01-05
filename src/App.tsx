@@ -4,7 +4,6 @@ import { GraphView } from './components/GraphView/Graph';
 import { NodeForm } from './components/Sidebar/NodeForm';
 import { EdgeForm } from './components/Sidebar/EdgeForm';
 
-
 export const App: React.FC = () => {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', padding: '10px' }}>
