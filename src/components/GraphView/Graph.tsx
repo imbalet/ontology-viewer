@@ -132,6 +132,12 @@ export const GraphView: React.FC = () => {
     });
   };
 
+  const onPaneClick = () => {
+    selectNode(undefined);
+    selectEdge(undefined);
+    closeContextMenu();
+  };
+
   return (
     <ReactFlowProvider>
       <div style={{ width: '100%', height: '600px', border: '1px solid #ccc' }}>
@@ -148,7 +154,7 @@ export const GraphView: React.FC = () => {
             onNodeContextMenu={onNodeContextMenu}
             onEdgeContextMenu={onEdgeContextMenu}
             onPaneContextMenu={onPaneContextMenu}
-            onPaneClick={closeContextMenu}
+            onPaneClick={onPaneClick}
             onConnect={onConnect}
             onNodeDragStop={onNodeDragStop}
             fitView
