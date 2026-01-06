@@ -120,8 +120,14 @@ export const GraphView: React.FC = () => {
     updateNode({ ...n, position: node.position });
   };
 
-  const onNodeClick = (_event: any, node: RFNode) => selectNode(node.id);
-  const onEdgeClick = (_event: any, edge: RFEdge) => selectEdge(edge.id);
+  const onNodeClick = (_event: any, node: RFNode) => {
+    closeContextMenu();
+    selectNode(node.id);
+  };
+  const onEdgeClick = (_event: any, edge: RFEdge) => {
+    closeContextMenu();
+    selectEdge(edge.id);
+  };
 
   const onConnect = (params: any) => {
     if (!ontology) return;
@@ -165,6 +171,13 @@ export const GraphView: React.FC = () => {
     closeContextMenu();
   };
 
+  const onMoveStart = () => {
+    closeContextMenu();
+  };
+  const onNodeDragStart = () => {
+    closeContextMenu();
+  };
+
   return (
     <ReactFlowProvider>
       <div ref={reactFlowWrapperRef} className={styles.container}>
@@ -182,8 +195,10 @@ export const GraphView: React.FC = () => {
             onEdgeContextMenu={(event, edge) => handleContextMenu('edge', edge.id)(event)}
             onPaneContextMenu={(event) => handleContextMenu('pane', null)(event)}
             onPaneClick={onPaneClick}
+            onMoveStart={onMoveStart}
             onConnect={onConnect}
             onNodeDragStop={onNodeDragStop}
+            onNodeDragStart={onNodeDragStart}
             fitView
           >
             <MiniMap className={styles.miniMap} />
