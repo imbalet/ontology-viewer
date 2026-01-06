@@ -2,6 +2,8 @@ import React, { useMemo } from 'react';
 import { useOntologyStore } from '../../state/useOntologyStore';
 import { type SchemaField } from '../../models/ontology';
 import { validateField } from '../../models/validation';
+import { Select } from '../Select/Select';
+import { TextInput } from '../TextInput/TextInput';
 
 export const EdgeForm: React.FC = () => {
   const ontology = useOntologyStore((s) => s.ontology);
@@ -28,7 +30,7 @@ export const EdgeForm: React.FC = () => {
   const hasErrors = useMemo(() => Object.values(errors).some(Boolean), [errors]);
 
   if (!ontology || !selectedEdgeId || !edge) {
-    return <div>Select an edge to edit</div>;
+    return null;
   }
 
   const edgeTypes = Object.keys(ontology.schema.edgeTypes);
@@ -57,17 +59,17 @@ export const EdgeForm: React.FC = () => {
 
     return (
       <div key={field.name} style={{ marginBottom: '8px' }}>
-        <label>
+        <label style={{ display: 'block', marginBottom: '4px' }}>
           {field.name}
           {field.required && ' *'}
         </label>
 
         {field.type === 'string' && (
-          <input value={value} onChange={(e) => handleFieldChange(field, e.target.value)} />
+          <TextInput value={value} onChange={(e) => handleFieldChange(field, e.target.value)} />
         )}
 
         {field.type === 'number' && (
-          <input
+          <TextInput
             type="number"
             value={value}
             onChange={(e) => handleFieldChange(field, Number(e.target.value))}
@@ -83,14 +85,14 @@ export const EdgeForm: React.FC = () => {
         )}
 
         {field.type === 'enum' && (
-          <select value={value} onChange={(e) => handleFieldChange(field, e.target.value)}>
+          <Select value={value} onChange={(e) => handleFieldChange(field, e.target.value)}>
             <option value="">—</option>
             {field.options?.map((opt) => (
               <option key={opt} value={opt}>
                 {opt}
               </option>
             ))}
-          </select>
+          </Select>
         )}
 
         {error && <div style={{ color: 'red', fontSize: '12px' }}>{error}</div>}
@@ -99,17 +101,21 @@ export const EdgeForm: React.FC = () => {
   };
 
   return (
-    <div style={{ border: '1px solid #ccc', padding: '10px', width: '250px' }}>
+    <div
+      style={{ border: '1px solid #ccc', padding: '10px', width: '250px', boxSizing: 'border-box' }}
+    >
       <h3>Edit Edge</h3>
 
-      <label>Type</label>
-      <select value={edge.type} onChange={(e) => handleTypeChange(e.target.value)}>
-        {edgeTypes.map((t) => (
-          <option key={t} value={t}>
-            {t}
-          </option>
-        ))}
-      </select>
+      <div key="type" style={{ marginBottom: '8px' }}>
+        <label style={{ display: 'block', marginBottom: '4px' }}>Type</label>
+        <Select value={edge.type} onChange={(e) => handleTypeChange(e.target.value)}>
+          {edgeTypes.map((t) => (
+            <option key={t} value={t}>
+              {t}
+            </option>
+          ))}
+        </Select>
+      </div>
 
       <h4>Properties</h4>
       {fields.map(renderField)}

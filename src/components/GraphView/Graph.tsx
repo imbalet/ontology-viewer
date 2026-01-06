@@ -15,6 +15,7 @@ import { ContextMenu } from '../ContextMenu/ContextMenu';
 import { getEdgeStyle } from './edgeStyles';
 import { getNodeStyle } from './nodeStyles';
 import { getHighlights } from './highlightUtils';
+import styles from './Graph.module.scss';
 
 export const GraphView: React.FC = () => {
   const reactFlowWrapperRef = useRef<HTMLDivElement>(null);
@@ -166,12 +167,9 @@ export const GraphView: React.FC = () => {
 
   return (
     <ReactFlowProvider>
-      <div
-        ref={reactFlowWrapperRef}
-        style={{ width: '100%', height: '100%', border: '1px solid #ccc', position: 'relative' }}
-      >
+      <div ref={reactFlowWrapperRef} className={styles.container}>
         {!hasOntology ? (
-          <div>Load ontology to view graph</div>
+          <div className={styles.noOntologyMessage}>Load ontology to view graph</div>
         ) : (
           <ReactFlow
             nodes={nodes}
@@ -188,8 +186,8 @@ export const GraphView: React.FC = () => {
             onNodeDragStop={onNodeDragStop}
             fitView
           >
-            <MiniMap />
-            <Controls />
+            <MiniMap className={styles.miniMap} />
+            <Controls className={styles.controls} />
             <Background />
           </ReactFlow>
         )}

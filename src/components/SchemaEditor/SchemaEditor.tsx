@@ -33,10 +33,7 @@ export const SchemaEditor: React.FC = () => {
 
   // ===== Node fields =====
   const addNodeField = () =>
-    updateSchema(
-      [...nodeFields, { name: '', type: 'string', required: false }],
-      edgeTypes
-    );
+    updateSchema([...nodeFields, { name: '', type: 'string', required: false }], edgeTypes);
 
   const updateNodeField = (index: number, field: SchemaField) =>
     updateSchema(
@@ -84,10 +81,7 @@ export const SchemaEditor: React.FC = () => {
       ...edgeTypes,
       [type]: {
         ...edgeTypes[type],
-        fields: [
-          ...(edgeTypes[type].fields ?? []),
-          { name: '', type: 'string', required: false },
-        ],
+        fields: [...(edgeTypes[type].fields ?? []), { name: '', type: 'string', required: false }],
       },
     });
 
@@ -96,9 +90,7 @@ export const SchemaEditor: React.FC = () => {
       ...edgeTypes,
       [type]: {
         ...edgeTypes[type],
-        fields: edgeTypes[type].fields!.map((f, i) =>
-          i === index ? field : f
-        ),
+        fields: edgeTypes[type].fields!.map((f, i) => (i === index ? field : f)),
       },
     });
 
@@ -122,9 +114,7 @@ export const SchemaEditor: React.FC = () => {
             <input
               value={f.name}
               placeholder="name"
-              onChange={(e) =>
-                updateNodeField(i, { ...f, name: e.target.value })
-              }
+              onChange={(e) => updateNodeField(i, { ...f, name: e.target.value })}
             />
             <select
               value={f.type}
@@ -164,17 +154,12 @@ export const SchemaEditor: React.FC = () => {
         <h3>Edge Types</h3>
         {Object.entries(edgeTypes).map(([type, cfg]) => (
           <div key={type}>
-            <input
-              value={type}
-              onChange={(e) => renameEdgeType(type, e.target.value)}
-            />
+            <input value={type} onChange={(e) => renameEdgeType(type, e.target.value)} />
             <label>
               <input
                 type="checkbox"
                 checked={cfg.directed}
-                onChange={(e) =>
-                  toggleEdgeDirected(type, e.target.checked)
-                }
+                onChange={(e) => toggleEdgeDirected(type, e.target.checked)}
               />
               directed
             </label>
@@ -205,15 +190,11 @@ export const SchemaEditor: React.FC = () => {
                   <option value="boolean">boolean</option>
                   <option value="enum">enum</option>
                 </select>
-                <button onClick={() => removeEdgeField(type, i)}>
-                  🗑
-                </button>
+                <button onClick={() => removeEdgeField(type, i)}>🗑</button>
               </div>
             ))}
 
-            <button onClick={() => addEdgeField(type)}>
-              + Add field
-            </button>
+            <button onClick={() => addEdgeField(type)}>+ Add field</button>
           </div>
         ))}
         <button onClick={addEdgeType}>+ Add edge type</button>

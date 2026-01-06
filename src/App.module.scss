@@ -1,0 +1,50 @@
+@import './styles/variables';
+
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  font-family: $font-family;
+  color: $text-color;
+
+  .main-content {
+    flex: 1;
+  }
+}
+
+.tab-buttons {
+  padding: 0.5rem;
+
+  z-index: 1000;
+}
+
+.view {
+  position: relative;
+  flex: 1;
+  display: flex;
+  width: 100%;
+  overflow: hidden;
+}
+
+.graphWrapper {
+  position: relative;
+  flex: 1;
+  display: flex;
+  width: 100%;
+}
+
+.graphWrapper > :first-child {
+  flex: 1;
+}
+
+.form {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  max-width: 300px;
+  max-height: 100%;
+  overflow-y: auto;
+  background: $background-color;
+  border-radius: 4px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}

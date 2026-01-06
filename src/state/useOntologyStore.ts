@@ -44,11 +44,11 @@ interface OntologyState {
 const hasAllPositions = (nodes: Node[]) =>
   nodes.every((n) => n.position && typeof n.position.x === 'number');
 
-
 // helper: push current ontology to undo stack
 const pushHistory = (state: OntologyState, newOntology: Ontology) => ({
   ontology: newOntology,
   undoStack: [...state.undoStack, state.ontology!],
+  
   redoStack: [],
 });
 
@@ -66,12 +66,12 @@ export const useOntologyStore = create<OntologyState>((set) => ({
       const nodes = nodesHavePositions
         ? data.nodes
         : applyAutoLayout(
-          data.nodes.map((n) => ({
-            ...n,
-            position: { x: 0, y: 0 },
-          })),
-          data.edges
-        );
+            data.nodes.map((n) => ({
+              ...n,
+              position: { x: 0, y: 0 },
+            })),
+            data.edges
+          );
 
       return {
         ontology: { ...data, nodes },

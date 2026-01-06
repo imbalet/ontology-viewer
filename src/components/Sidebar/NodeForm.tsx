@@ -2,6 +2,9 @@ import React, { useMemo } from 'react';
 import { useOntologyStore } from '../../state/useOntologyStore';
 import type { Node, SchemaField } from '../../models/ontology';
 import { validateField } from '../../models/validation';
+import { Select } from '../Select/Select';
+import { TextInput } from '../TextInput/TextInput';
+import styles from './NodeForm.module.scss';
 
 export const NodeForm: React.FC = () => {
   const selectedNodeId = useOntologyStore((s) => s.selectedNodeId);
@@ -24,7 +27,7 @@ export const NodeForm: React.FC = () => {
   const hasErrors = useMemo(() => Object.values(errors).some(Boolean), [errors]);
 
   if (!selectedNodeId || !ontology || !node) {
-    return <div>Select a node to edit</div>;
+    return null;
   }
 
   const handleChange = (field: SchemaField, value: any) => {
@@ -39,22 +42,22 @@ export const NodeForm: React.FC = () => {
   };
 
   return (
-    <div style={{ border: '1px solid #ccc', padding: '10px', width: '250px' }}>
-      <h3>Edit Node: {node.properties.name || node.id}</h3>
+    <div className={styles.container}>
+      <h3 className={styles.header}>Edit Node: {node.properties.name || node.id}</h3>
 
       {fields.map((field) => {
         const value = node.properties?.[field.name] ?? '';
         const error = errors[field.name];
 
         return (
-          <div key={field.name} style={{ marginBottom: '8px' }}>
-            <label style={{ display: 'block' }}>
+          <div key={field.name} className={styles.field}>
+            <label className={styles.label}>
               {field.name}
               {field.required && ' *'}
             </label>
 
             {field.type === 'string' && (
-              <input
+              <TextInput
                 type="text"
                 value={value}
                 onChange={(e) => handleChange(field, e.target.value)}
@@ -62,7 +65,7 @@ export const NodeForm: React.FC = () => {
             )}
 
             {field.type === 'number' && (
-              <input
+              <TextInput
                 type="number"
                 value={value}
                 onChange={(e) => handleChange(field, Number(e.target.value))}
@@ -78,24 +81,22 @@ export const NodeForm: React.FC = () => {
             )}
 
             {field.type === 'enum' && (
-              <select value={value} onChange={(e) => handleChange(field, e.target.value)}>
+              <Select value={value} onChange={(e) => handleChange(field, e.target.value)}>
                 <option value="">—</option>
                 {field.options?.map((opt) => (
                   <option key={opt} value={opt}>
                     {opt}
                   </option>
                 ))}
-              </select>
+              </Select>
             )}
 
-            {error && <div style={{ color: 'red', fontSize: '12px' }}>{error}</div>}
+            {error && <div className={styles.errorText}>{error}</div>}
           </div>
         );
       })}
 
-      {hasErrors && (
-        <div style={{ color: '#c53030', fontSize: '12px' }}>Please fix validation errors</div>
-      )}
+      {hasErrors && <div className={styles.validationError}>Please fix validation errors</div>}
     </div>
   );
 };

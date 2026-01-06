@@ -3,6 +3,8 @@ import { useOntologyStore } from '../../state/useOntologyStore';
 import { useReactFlow } from 'reactflow';
 import { createEmptyNode } from '../../models/createNode';
 import { generateId } from '../../utils/id';
+import { Button } from '../Button/Button';
+import styles from './ContextMenu.module.scss';
 
 export const ContextMenu: React.FC = () => {
   const contextMenu = useOntologyStore((s) => s.contextMenu);
@@ -10,7 +12,8 @@ export const ContextMenu: React.FC = () => {
   const removeNode = useOntologyStore((s) => s.removeNode);
   const removeEdge = useOntologyStore((s) => s.removeEdge);
   const addNode = useOntologyStore((s) => s.addNode);
-  // const setSelectedNodeId = useOntologyStore((s) => s.setSelectedNodeId);
+  const selectNode = useOntologyStore((s) => s.selectNode);
+
   const ontology = useOntologyStore((s) => s.ontology);
 
   const { project } = useReactFlow();
@@ -23,12 +26,9 @@ export const ContextMenu: React.FC = () => {
   const handleDelete = () => {
     if (!targetId) return;
 
-    const label =
-      type === 'node'
-        ? 'узел (и все связанные рёбра)'
-        : 'ребро';
+    const label = type === 'node' ? 'node (and all connected edges)' : 'edge';
 
-    const ok = window.confirm(`Удалить ${label}?`);
+    const ok = window.confirm(`Delete ${label}?`);
     if (!ok) return;
 
     if (type === 'node') removeNode(targetId);
@@ -36,7 +36,6 @@ export const ContextMenu: React.FC = () => {
 
     closeMenu();
   };
-
 
   const handleCreateNode = () => {
     if (!position) return;
@@ -47,25 +46,23 @@ export const ContextMenu: React.FC = () => {
     const node = createEmptyNode(id, ontology.schema.nodeFields, graphPos);
 
     addNode(node);
-    // setSelectedNodeId(id);
+    selectNode(id);
     closeMenu();
   };
 
   return (
     <div
+      className={styles.contextMenu}
       style={{
-        position: 'absolute',
         top: position?.y,
         left: position?.x,
-        background: '#fff',
-        border: '1px solid #ccc',
-        padding: '6px',
-        zIndex: 1000,
       }}
     >
-      {type === 'pane' && <button onClick={handleCreateNode}>+ Create Node</button>}
+      {type === 'pane' && <Button onClick={handleCreateNode}>+ Create Node</Button>}
       {(type === 'node' || type === 'edge') && (
-        <button onClick={handleDelete}>🗑 Delete {type}</button>
+        <Button variant="danger" onClick={handleDelete}>
+          🗑 Delete {type}
+        </Button>
       )}
     </div>
   );

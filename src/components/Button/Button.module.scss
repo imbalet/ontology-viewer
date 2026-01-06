@@ -1,0 +1,32 @@
+@import "../../styles/variables";
+
+.button {
+    padding: 8px 16px;
+    background-color: $button-bg-color;
+    color: $text-color;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    &:hover {
+        background-color: $button-bg-color-hover;
+    }
+
+    &.active {
+        background-color: $button-bg-color-active;
+
+        &:hover {
+            background-color: $button-bg-color-active;
+        }
+    }
+
+    &.danger {
+        background-color: $button-bg-color-danger;
+        color: white;
+
+        &:hover {
+            background-color: $button-bg-color-danger-hover;
+        }
+    }
+}

@@ -1,7 +1,9 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useRef } from 'react';
 import { useOntologyStore } from '../../state/useOntologyStore';
 import { importOntology, exportOntology } from '../../utils/jsonIO';
 import { applyAutoLayout } from '../../utils/layout';
+import { Button } from '../Button/Button';
+import styles from './Toolbar.module.scss';
 
 export const Toolbar: React.FC = () => {
   const loadOntology = useOntologyStore((s) => s.loadOntology);
@@ -9,14 +11,11 @@ export const Toolbar: React.FC = () => {
   const undo = useOntologyStore((s) => s.undo);
   const redo = useOntologyStore((s) => s.redo);
 
-  const handleAutoLayout = useCallback(() => {
-    const state = useOntologyStore.getState();
-    const ontology = state.ontology;
-    if (!ontology) return;
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const newNodes = applyAutoLayout(ontology.nodes, ontology.edges);
-    updateNodesWithHistory(newNodes);
-  }, [updateNodesWithHistory]);
+  const handleNew = useCallback(() => {
+    loadOntology({ nodes: [], edges: [], schema: { nodeFields: [], edgeTypes: {} } });
+  }, [loadOntology]);
 
   const handleImport = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -36,13 +35,30 @@ export const Toolbar: React.FC = () => {
     exportOntology(ontology);
   }, []);
 
+  const handleAutoLayout = useCallback(() => {
+    const state = useOntologyStore.getState();
+    const ontology = state.ontology;
+    if (!ontology) return;
+
+    const newNodes = applyAutoLayout(ontology.nodes, ontology.edges);
+    updateNodesWithHistory(newNodes);
+  }, [updateNodesWithHistory]);
+
   return (
-    <div style={{ marginBottom: '10px', display: 'flex', gap: '6px' }}>
-      <input type="file" accept=".json" onChange={handleImport} />
-      <button onClick={handleExport}>Export</button>
-      <button onClick={handleAutoLayout}>Auto-layout</button>
-      <button onClick={undo}>Undo</button>
-      <button onClick={redo}>Redo</button>
+    <div className={styles.toolbar}>
+      <input
+        type="file"
+        accept=".json"
+        ref={fileInputRef}
+        style={{ display: 'none' }}
+        onChange={handleImport}
+      />
+      <Button onClick={handleNew}>Создать новую</Button>
+      <Button onClick={() => fileInputRef.current?.click()}>Загрузить</Button>
+      <Button onClick={handleExport}>Export</Button>
+      <Button onClick={handleAutoLayout}>Auto-layout</Button>
+      <Button onClick={undo}>Undo</Button>
+      <Button onClick={redo}>Redo</Button>
     </div>
   );
 };

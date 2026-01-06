@@ -4,31 +4,33 @@ import { GraphView } from './components/GraphView/Graph';
 import { NodeForm } from './components/Sidebar/NodeForm';
 import { EdgeForm } from './components/Sidebar/EdgeForm';
 import { SchemaEditor } from './components/SchemaEditor/SchemaEditor';
+import { Button } from './components/Button/Button';
+import styles from './App.module.scss';
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'graph' | 'schema'>('graph');
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', padding: '10px', height: '100vh' }}>
-      <Toolbar />
-
-      {/* Вкладки: Graph или Schema Editor */}
-      <div style={{ marginBottom: '10px' }}>
-        <button onClick={() => setActiveTab('graph')}>Graph</button>
-        <button onClick={() => setActiveTab('schema')}>Schema Editor</button>
+    <div className={styles.app}>
+      <div className={styles['tab-buttons']}>
+        <Button active={activeTab === 'graph'} onClick={() => setActiveTab('graph')}>
+          Graph
+        </Button>
+        <Button active={activeTab === 'schema'} onClick={() => setActiveTab('schema')}>
+          Schema Editor
+        </Button>
       </div>
-
-      <div style={{ display: 'flex', flex: 1, gap: '10px', overflow: 'auto' }}>
+      <div className={styles.view}>
+        <Toolbar />
         {activeTab === 'graph' && (
-          <>
+          <div className={styles.graphWrapper}>
             <GraphView />
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <div className={styles.form}>
               <NodeForm />
               <EdgeForm />
             </div>
-          </>
+          </div>
         )}
-
         {activeTab === 'schema' && <SchemaEditor />}
       </div>
     </div>

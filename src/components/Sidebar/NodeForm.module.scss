@@ -1,0 +1,28 @@
+.container {
+    border: 1px solid #ccc;
+    padding: 10px;
+    width: 250px;
+}
+
+.header {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.field {
+    margin-bottom: 8px;
+}
+
+.label {
+    display: block;
+}
+
+.errorText {
+    color: red;
+    font-size: 12px;
+}
+
+.validationError {
+    color: #c53030;
+    font-size: 12px;
+}
