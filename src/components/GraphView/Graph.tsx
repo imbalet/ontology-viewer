@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import ReactFlow, {
   ReactFlowProvider,
   MiniMap,
@@ -17,6 +17,7 @@ import { getNodeStyle } from './nodeStyles';
 import { getHighlights } from './highlightUtils';
 
 export const GraphView: React.FC = () => {
+  const reactFlowWrapperRef = useRef<HTMLDivElement>(null);
   const ontology = useOntologyStore((s) => s.ontology);
   const selectNode = useOntologyStore((s) => s.selectNode);
   const selectEdge = useOntologyStore((s) => s.selectEdge);
@@ -35,7 +36,6 @@ export const GraphView: React.FC = () => {
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
   const hasOntology = ontology !== null;
-
 
   useEffect(() => {
     if (!ontology) return;
@@ -62,30 +62,25 @@ export const GraphView: React.FC = () => {
     );
 
     setEdges(
-      ontology.edges.map((e) =>
-      ({
-        id: e.id,
-        source: e.source,
-        target: e.target,
-        ...getEdgeStyle(e.type, {
-          selected: e.id === selectedEdgeId,
-          highlighted: highlightedEdges.has(e.id),
-        }),
-      } as any)
+      ontology.edges.map(
+        (e) =>
+          ({
+            id: e.id,
+            source: e.source,
+            target: e.target,
+            ...getEdgeStyle(e.type, {
+              selected: e.id === selectedEdgeId,
+              highlighted: highlightedEdges.has(e.id),
+            }),
+          }) as any
       )
     );
   }, [ontology, selectedNodeId, selectedEdgeId]);
 
-
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       const el = e.target as HTMLElement | null;
-      if (
-        el &&
-        (el.tagName === 'INPUT' ||
-          el.tagName === 'TEXTAREA' ||
-          el.isContentEditable)
-      ) {
+      if (el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable)) {
         return;
       }
 
@@ -101,9 +96,7 @@ export const GraphView: React.FC = () => {
 
       if (selectedNodeId) {
         e.preventDefault();
-        const ok = window.confirm(
-          'Delete selected node? All connected edges will be removed.'
-        );
+        const ok = window.confirm('Delete selected node? All connected edges will be removed.');
         if (ok) removeNode(selectedNodeId);
         return;
       }
@@ -118,7 +111,6 @@ export const GraphView: React.FC = () => {
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, [selectedNodeId, selectedEdgeId, removeNode, removeEdge]);
-
 
   const onNodeDragStop = (_event: any, node: RFNode) => {
     const n = ontology?.nodes.find((n) => n.id === node.id);
@@ -155,7 +147,14 @@ export const GraphView: React.FC = () => {
   function handleContextMenu(type: 'node' | 'edge' | 'pane', id: string | null) {
     return (event: React.MouseEvent) => {
       event.preventDefault();
-      openContextMenu(type, id, { x: event.clientX, y: event.clientY });
+
+      const bounds = reactFlowWrapperRef.current?.getBoundingClientRect();
+      if (!bounds) return;
+
+      openContextMenu(type, id, {
+        x: event.clientX - bounds.left,
+        y: event.clientY - bounds.top,
+      });
     };
   }
 
@@ -167,7 +166,10 @@ export const GraphView: React.FC = () => {
 
   return (
     <ReactFlowProvider>
-      <div style={{ width: '100%', height: '600px', border: '1px solid #ccc' }}>
+      <div
+        ref={reactFlowWrapperRef}
+        style={{ width: '100%', height: '100%', border: '1px solid #ccc', position: 'relative' }}
+      >
         {!hasOntology ? (
           <div>Load ontology to view graph</div>
         ) : (
@@ -191,8 +193,8 @@ export const GraphView: React.FC = () => {
             <Background />
           </ReactFlow>
         )}
+        <ContextMenu />
       </div>
-      <ContextMenu />
-    </ReactFlowProvider >
+    </ReactFlowProvider>
   );
 };
