@@ -37,6 +37,8 @@ interface OntologyState {
   ) => void;
   closeContextMenu: () => void;
 
+  updateSchema: (updater: (schema: Ontology['schema']) => Ontology['schema']) => void;
+
   undo: () => void;
   redo: () => void;
 }
@@ -166,6 +168,18 @@ export const useOntologyStore = create<OntologyState>((set) => ({
   contextMenu: null,
   openContextMenu: (type, targetId, position) => set({ contextMenu: { type, targetId, position } }),
   closeContextMenu: () => set({ contextMenu: null }),
+
+  updateSchema: (updater) =>
+    set((state) => {
+      if (!state.ontology) return state;
+
+      const newOntology: Ontology = {
+        ...state.ontology,
+        schema: updater(state.ontology.schema),
+      };
+
+      return { ...state, ...pushHistory(state, newOntology) };
+    }),
 
   undo: () =>
     set((state) => {
