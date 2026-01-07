@@ -48,7 +48,7 @@ const hasAllPositions = (nodes: Node[]) =>
 const pushHistory = (state: OntologyState, newOntology: Ontology) => ({
   ontology: newOntology,
   undoStack: [...state.undoStack, state.ontology!],
-  
+
   redoStack: [],
 });
 

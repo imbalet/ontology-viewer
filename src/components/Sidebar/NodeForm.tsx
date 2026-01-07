@@ -59,6 +59,7 @@ export const NodeForm: React.FC = () => {
             {field.type === 'string' && (
               <TextInput
                 type="text"
+                variant={field.required ? 'required' : 'default'}
                 value={value}
                 onChange={(e) => handleChange(field, e.target.value)}
               />
@@ -67,6 +68,7 @@ export const NodeForm: React.FC = () => {
             {field.type === 'number' && (
               <TextInput
                 type="number"
+                variant={field.required ? 'required' : 'default'}
                 value={value}
                 onChange={(e) => handleChange(field, Number(e.target.value))}
               />
@@ -81,7 +83,11 @@ export const NodeForm: React.FC = () => {
             )}
 
             {field.type === 'enum' && (
-              <Select value={value} onChange={(e) => handleChange(field, e.target.value)}>
+              <Select
+                variant={field.required ? 'required' : 'default'}
+                value={value}
+                onChange={(e) => handleChange(field, e.target.value)}
+              >
                 <option value="">—</option>
                 {field.options?.map((opt) => (
                   <option key={opt} value={opt}>

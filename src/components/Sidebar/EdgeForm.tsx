@@ -4,6 +4,7 @@ import { type SchemaField } from '../../models/ontology';
 import { validateField } from '../../models/validation';
 import { Select } from '../Select/Select';
 import { TextInput } from '../TextInput/TextInput';
+import styles from './EdgeForm.module.scss';
 
 export const EdgeForm: React.FC = () => {
   const ontology = useOntologyStore((s) => s.ontology);
@@ -58,18 +59,23 @@ export const EdgeForm: React.FC = () => {
     const error = errors[field.name];
 
     return (
-      <div key={field.name} style={{ marginBottom: '8px' }}>
-        <label style={{ display: 'block', marginBottom: '4px' }}>
+      <div key={field.name} className={styles.fieldWrapper}>
+        <label className={styles.label}>
           {field.name}
           {field.required && ' *'}
         </label>
 
         {field.type === 'string' && (
-          <TextInput value={value} onChange={(e) => handleFieldChange(field, e.target.value)} />
+          <TextInput
+            variant={field.required ? 'required' : 'default'}
+            value={value}
+            onChange={(e) => handleFieldChange(field, e.target.value)}
+          />
         )}
 
         {field.type === 'number' && (
           <TextInput
+            variant={field.required ? 'required' : 'default'}
             type="number"
             value={value}
             onChange={(e) => handleFieldChange(field, Number(e.target.value))}
@@ -85,7 +91,11 @@ export const EdgeForm: React.FC = () => {
         )}
 
         {field.type === 'enum' && (
-          <Select value={value} onChange={(e) => handleFieldChange(field, e.target.value)}>
+          <Select
+            variant={field.required ? 'required' : 'default'}
+            value={value}
+            onChange={(e) => handleFieldChange(field, e.target.value)}
+          >
             <option value="">—</option>
             {field.options?.map((opt) => (
               <option key={opt} value={opt}>
@@ -95,19 +105,17 @@ export const EdgeForm: React.FC = () => {
           </Select>
         )}
 
-        {error && <div style={{ color: 'red', fontSize: '12px' }}>{error}</div>}
+        {error && <div className={styles.error}>{error}</div>}
       </div>
     );
   };
 
   return (
-    <div
-      style={{ border: '1px solid #ccc', padding: '10px', width: '250px', boxSizing: 'border-box' }}
-    >
-      <h3>Edit Edge</h3>
+    <div className={styles.container}>
+      <h3 className={styles.heading}>Edit Edge</h3>
 
-      <div key="type" style={{ marginBottom: '8px' }}>
-        <label style={{ display: 'block', marginBottom: '4px' }}>Type</label>
+      <div className={styles.typeSelect}>
+        <label className={styles.label}>Type</label>
         <Select value={edge.type} onChange={(e) => handleTypeChange(e.target.value)}>
           {edgeTypes.map((t) => (
             <option key={t} value={t}>
@@ -120,11 +128,9 @@ export const EdgeForm: React.FC = () => {
       <h4>Properties</h4>
       {fields.map(renderField)}
 
-      {hasErrors && (
-        <div style={{ color: '#c53030', fontSize: '12px' }}>Please fix validation errors</div>
-      )}
+      {hasErrors && <div className={styles.errorMessage}>Please fix validation errors</div>}
 
-      <div style={{ marginTop: '12px', fontSize: '12px', color: '#666' }}>
+      <div className={styles.info}>
         {edge.source} → {edge.target}
       </div>
     </div>

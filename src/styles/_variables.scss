@@ -1,5 +1,6 @@
 $primary-color: #414488;
 $secondary-color: #2ecc71;
+$error-color: #e74c3c;
 
 $background-color: #28292d;
 
@@ -9,13 +10,17 @@ $button-bg-color-danger-hover: #ba4545;
 $button-bg-color-hover: #54565f;
 $button-bg-color-active: $primary-color;
 
+$border-color: #ccc;
+$border-delimiter-color: #414349;
+
 $text-color: #f2f2f2;
+$text-color-secondary: #777777;
 $font-family:
   -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans',
   'Helvetica Neue', sans-serif;
 $font-size-base: 16px;
 
-// NEW: field palette
+// field palette
 $field-bg-color: #2f3138;
 $field-bg-color-active: #353846;
 
@@ -25,6 +30,11 @@ $field-border-color-hover: #54565f;
 $field-placeholder-color: rgba($text-color, 0.55);
 $field-icon-color: rgba($text-color, 0.75);
 
-// NEW: danger for inputs/selects
+// danger for inputs/selects
 $danger-color: $button-bg-color-danger;
 $danger-color-hover: $button-bg-color-danger-hover;
+
+$border: 1px solid $border-color;
+$border-delimiter: 1px solid $border-delimiter-color;
+
+$box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);

@@ -1,74 +1,74 @@
-@import "../../styles/variables";
+@import '../../styles/variables';
 
 .input {
-    box-sizing: border-box;
-    display: block;
-    min-width: 0;
-    width: 100%;
-    max-width: 100%;
-    padding: 8px 12px;
-    background-color: $field-bg-color;
-    color: $text-color;
+  box-sizing: border-box;
+  display: block;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  padding: 8px 12px;
+  background-color: $field-bg-color;
+  color: $text-color;
 
-    border: 1px solid $field-border-color;
-    border-radius: 6px;
+  border: $border;
+  border-radius: 6px;
 
-    font-family: $font-family;
-    font-size: $font-size-base;
+  font-family: $font-family;
+  font-size: $font-size-base;
 
-    outline: none;
-    transition:
-        border-color 0.2s,
-        background-color 0.2s,
-        box-shadow 0.2s;
+  outline: none;
+  transition:
+    border-color 0.2s,
+    background-color 0.2s,
+    box-shadow 0.2s;
 
-    &::placeholder {
-        color: $field-placeholder-color;
-    }
+  &::placeholder {
+    color: $field-placeholder-color;
+  }
 
-    &:hover {
-        border-color: $field-border-color-hover;
-    }
+  &:hover {
+    border-color: $field-border-color-hover;
+  }
 
-    &:focus {
-        border-color: $primary-color;
-        box-shadow: 0 0 0 3px rgba($primary-color, 0.25);
-    }
+  &:focus {
+    border-color: $primary-color;
+    box-shadow: $box-shadow;
+  }
 
-    &:disabled {
-        cursor: not-allowed;
-        opacity: 0.6;
-    }
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
 }
 
-.input[type="number"] {
-    appearance: textfield;
+.input[type='number'] {
+  appearance: textfield;
 }
 
-.input[type="number"]::-webkit-inner-spin-button,
-.input[type="number"]::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
+.input[type='number']::-webkit-inner-spin-button,
+.input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 .active {
-    border-color: $primary-color;
-    background-color: $field-bg-color-active;
+  border-color: $primary-color;
+  background-color: $field-bg-color-active;
 }
 
 .error {
-    border-color: $danger-color;
+  border-color: $danger-color;
 
-    &:focus {
-        border-color: $danger-color;
-        box-shadow: 0 0 0 3px rgba($danger-color, 0.25);
-    }
+  &:focus {
+    border-color: $danger-color;
+    box-shadow: $box-shadow;
+  }
 }
 
-.danger {
-    border-color: $danger-color;
+.required {
+  border-color: $danger-color;
 
-    &:hover {
-        border-color: $danger-color-hover;
-    }
+  &:hover {
+    border-color: $danger-color-hover;
+  }
 }

@@ -3,7 +3,7 @@ import clsx from 'clsx';
 import styles from './Select.module.scss';
 
 export type SelectProps = React.SelectHTMLAttributes<HTMLSelectElement> & {
-  variant?: 'default' | 'danger';
+  variant?: 'default' | 'required';
   active?: boolean;
   error?: boolean;
 };

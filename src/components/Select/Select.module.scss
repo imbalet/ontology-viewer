@@ -1,76 +1,75 @@
-@import "../../styles/variables";
+@import '../../styles/variables';
 
 .select {
-    width: 100%;
-    padding: 8px 40px 8px 12px;
-    background-color: $field-bg-color;
-    color: $text-color;
+  width: 100%;
+  padding: 8px 40px 8px 12px;
+  background-color: $field-bg-color;
+  color: $text-color;
 
-    border: 1px solid $field-border-color;
-    border-radius: 6px;
+  border: $border;
+  border-radius: 6px;
 
-    font-family: $font-family;
-    font-size: $font-size-base;
+  font-family: $font-family;
+  font-size: $font-size-base;
 
-    outline: none;
-    cursor: pointer;
-    transition:
-        border-color 0.2s,
-        background-color 0.2s,
-        box-shadow 0.2s;
+  outline: none;
+  cursor: pointer;
+  transition:
+    border-color 0.2s,
+    background-color 0.2s,
+    box-shadow 0.2s;
 
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
 
-    // “стрелка” справа
-    background-image:
-        linear-gradient(45deg, transparent 50%, $field-icon-color 50%),
-        linear-gradient(135deg, $field-icon-color 50%, transparent 50%),
-        linear-gradient(to right, transparent, transparent);
-    background-position:
-        calc(100% - 18px) 50%,
-        calc(100% - 12px) 50%,
-        100% 0;
-    background-size:
-        6px 6px,
-        6px 6px,
-        2.5em 2.5em;
-    background-repeat: no-repeat;
+  background-image:
+    linear-gradient(45deg, transparent 50%, $field-icon-color 50%),
+    linear-gradient(135deg, $field-icon-color 50%, transparent 50%),
+    linear-gradient(to right, transparent, transparent);
+  background-position:
+    calc(100% - 18px) 50%,
+    calc(100% - 12px) 50%,
+    100% 0;
+  background-size:
+    6px 6px,
+    6px 6px,
+    2.5em 2.5em;
+  background-repeat: no-repeat;
 
-    &:hover {
-        border-color: $field-border-color-hover;
-    }
+  &:hover {
+    border-color: $field-border-color-hover;
+  }
 
-    &:focus {
-        border-color: $primary-color;
-        box-shadow: 0 0 0 3px rgba($primary-color, 0.25);
-    }
+  &:focus {
+    border-color: $primary-color;
+    box-shadow: $box-shadow;
+  }
 
-    &:disabled {
-        cursor: not-allowed;
-        opacity: 0.6;
-    }
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
 }
 
 .active {
-    border-color: $primary-color;
-    background-color: $field-bg-color-active;
+  border-color: $primary-color;
+  background-color: $field-bg-color-active;
 }
 
 .error {
-    border-color: $danger-color;
+  border-color: $danger-color;
 
-    &:focus {
-        border-color: $danger-color;
-        box-shadow: 0 0 0 3px rgba($danger-color, 0.25);
-    }
+  &:focus {
+    border-color: $danger-color;
+    box-shadow: $box-shadow;
+  }
 }
 
-.danger {
-    border-color: $danger-color;
+.required {
+  border-color: $danger-color;
 
-    &:hover {
-        border-color: $danger-color-hover;
-    }
+  &:hover {
+    border-color: $danger-color-hover;
+  }
 }

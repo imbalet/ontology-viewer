@@ -6,7 +6,7 @@ type InputType = 'text' | 'password' | 'email' | 'number' | 'search' | 'tel' | '
 
 export type TextInputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type'> & {
   type?: InputType;
-  variant?: 'default' | 'danger';
+  variant?: 'default' | 'required';
   active?: boolean;
   error?: boolean;
 };

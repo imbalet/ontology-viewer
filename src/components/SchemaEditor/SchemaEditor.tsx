@@ -1,6 +1,10 @@
 import React from 'react';
 import { useOntologyStore } from '../../state/useOntologyStore';
 import type { SchemaField } from '../../models/ontology';
+import { Select } from '../Select/Select';
+import { TextInput } from '../TextInput/TextInput';
+import styles from './SchemaEditor.module.scss';
+import { Button } from '../Button/Button';
 
 interface EdgeTypeConfig {
   directed: boolean;
@@ -17,7 +21,6 @@ export const SchemaEditor: React.FC = () => {
 
   const { nodeFields, edgeTypes } = ontology.schema;
 
-  // ===== helper =====
   const updateSchema = (
     newNodeFields: SchemaField[],
     newEdgeTypes: Record<string, EdgeTypeConfig>
@@ -31,7 +34,6 @@ export const SchemaEditor: React.FC = () => {
     });
   };
 
-  // ===== Node fields =====
   const addNodeField = () =>
     updateSchema([...nodeFields, { name: '', type: 'string', required: false }], edgeTypes);
 
@@ -47,7 +49,6 @@ export const SchemaEditor: React.FC = () => {
       edgeTypes
     );
 
-  // ===== Edge types =====
   const addEdgeType = () => {
     const name = `new_edge_${Date.now()}`;
     updateSchema(nodeFields, {
@@ -103,20 +104,18 @@ export const SchemaEditor: React.FC = () => {
       },
     });
 
-  // ===== UI =====
   return (
-    <div style={{ display: 'flex', gap: 40, padding: 10 }}>
-      {/* Node Fields */}
-      <div style={{ flex: 1, border: '1px solid #ccc', padding: 10 }}>
+    <div className={styles.container}>
+      <div className={styles.column}>
         <h3>Node Fields</h3>
         {nodeFields.map((f, i) => (
-          <div key={i}>
-            <input
+          <div key={i} className={styles.nodeField}>
+            <TextInput
               value={f.name}
               placeholder="name"
               onChange={(e) => updateNodeField(i, { ...f, name: e.target.value })}
             />
-            <select
+            <Select
               value={f.type}
               onChange={(e) =>
                 updateNodeField(i, {
@@ -129,7 +128,7 @@ export const SchemaEditor: React.FC = () => {
               <option value="number">number</option>
               <option value="boolean">boolean</option>
               <option value="enum">enum</option>
-            </select>
+            </Select>
             <label>
               <input
                 type="checkbox"
@@ -143,67 +142,69 @@ export const SchemaEditor: React.FC = () => {
               />
               required
             </label>
-            <button onClick={() => removeNodeField(i)}>🗑</button>
+            <Button onClick={() => removeNodeField(i)}>🗑</Button>
           </div>
         ))}
-        <button onClick={addNodeField}>+ Add field</button>
+        <Button onClick={addNodeField}>+ Add field</Button>
       </div>
 
-      {/* Edge Types */}
-      <div style={{ flex: 1, border: '1px solid #ccc', padding: 10 }}>
+      <div className={styles.column}>
         <h3>Edge Types</h3>
         {Object.entries(edgeTypes).map(([type, cfg]) => (
-          <div key={type}>
-            <input value={type} onChange={(e) => renameEdgeType(type, e.target.value)} />
-            <label>
-              <input
-                type="checkbox"
-                checked={cfg.directed}
-                onChange={(e) => toggleEdgeDirected(type, e.target.checked)}
-              />
-              directed
-            </label>
-            <button onClick={() => removeEdgeType(type)}>🗑</button>
-
-            {(cfg.fields ?? []).map((f, i) => (
-              <div key={i} style={{ marginLeft: 12 }}>
+          <div key={type} className={styles.edgeField}>
+            <div className={styles.edgeGeneral}>
+              <TextInput value={type} onChange={(e) => renameEdgeType(type, e.target.value)} />
+              <label>
                 <input
-                  value={f.name}
-                  onChange={(e) =>
-                    updateEdgeField(type, i, {
-                      ...f,
-                      name: e.target.value,
-                    })
-                  }
+                  type="checkbox"
+                  checked={cfg.directed}
+                  onChange={(e) => toggleEdgeDirected(type, e.target.checked)}
                 />
-                <select
-                  value={f.type}
-                  onChange={(e) =>
-                    updateEdgeField(type, i, {
-                      ...f,
-                      type: e.target.value as any,
-                    })
-                  }
-                >
-                  <option value="string">string</option>
-                  <option value="number">number</option>
-                  <option value="boolean">boolean</option>
-                  <option value="enum">enum</option>
-                </select>
-                <button onClick={() => removeEdgeField(type, i)}>🗑</button>
-              </div>
-            ))}
+                directed
+              </label>
+              <Button onClick={() => removeEdgeType(type)}>🗑</Button>
+            </div>
 
-            <button onClick={() => addEdgeField(type)}>+ Add field</button>
+            <div className={styles.edgeProperties}>
+              {(cfg.fields ?? []).map((f, i) => (
+                <div key={i} className={styles.edgePropertiesField}>
+                  <TextInput
+                    value={f.name}
+                    onChange={(e) =>
+                      updateEdgeField(type, i, {
+                        ...f,
+                        name: e.target.value,
+                      })
+                    }
+                  />
+                  <Select
+                    value={f.type}
+                    onChange={(e) =>
+                      updateEdgeField(type, i, {
+                        ...f,
+                        type: e.target.value as any,
+                      })
+                    }
+                  >
+                    <option value="string">string</option>
+                    <option value="number">number</option>
+                    <option value="boolean">boolean</option>
+                    <option value="enum">enum</option>
+                  </Select>
+                  <Button onClick={() => removeEdgeField(type, i)}>🗑</Button>
+                </div>
+              ))}
+            </div>
+
+            <Button onClick={() => addEdgeField(type)}>+ Add field</Button>
           </div>
         ))}
-        <button onClick={addEdgeType}>+ Add edge type</button>
+        <Button onClick={addEdgeType}>+ Add edge type</Button>
       </div>
 
-      {/* Undo / Redo */}
-      <div style={{ position: 'fixed', bottom: 20, right: 20 }}>
-        <button onClick={undo}>Undo</button>
-        <button onClick={redo}>Redo</button>
+      <div className={styles.fixed}>
+        <Button onClick={undo}>Undo</Button>
+        <Button onClick={redo}>Redo</Button>
       </div>
     </div>
   );
