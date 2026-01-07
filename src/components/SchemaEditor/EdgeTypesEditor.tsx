@@ -6,6 +6,7 @@ import { Select } from '../Select/Select';
 import { Button } from '../Button/Button';
 import { emptyField, updateAt, removeAt } from './schemaUtils';
 import type { EdgeTypeConfig, FieldType } from './types';
+import { EnumOptionsEditor } from './EnumOptionsEditor';
 import styles from './SchemaEditor.module.scss';
 
 interface Props {
@@ -19,19 +20,13 @@ export const EdgeTypesEditor: React.FC<Props> = ({ schema }) => {
   const addEdgeType = () =>
     updateSchema((s) => ({
       ...s,
-      edgeTypes: {
-        ...s.edgeTypes,
-        [`edge_${Date.now()}`]: { directed: true, fields: [] },
-      },
+      edgeTypes: { ...s.edgeTypes, [`edge_${Date.now()}`]: { directed: true, fields: [] } },
     }));
 
   const updateEdgeType = (type: string, patch: Partial<EdgeTypeConfig>) =>
     updateSchema((s) => ({
       ...s,
-      edgeTypes: {
-        ...s.edgeTypes,
-        [type]: { ...s.edgeTypes[type], ...patch },
-      },
+      edgeTypes: { ...s.edgeTypes, [type]: { ...s.edgeTypes[type], ...patch } },
     }));
 
   const removeEdgeType = (type: string) =>
@@ -48,19 +43,13 @@ export const EdgeTypesEditor: React.FC<Props> = ({ schema }) => {
     });
 
   const addEdgeField = (type: string) =>
-    updateEdgeType(type, {
-      fields: [...(edgeTypes[type].fields ?? []), emptyField()],
-    });
+    updateEdgeType(type, { fields: [...(edgeTypes[type].fields ?? []), emptyField()] });
 
   const updateEdgeField = (type: string, index: number, field: SchemaField) =>
-    updateEdgeType(type, {
-      fields: updateAt(edgeTypes[type].fields ?? [], index, field),
-    });
+    updateEdgeType(type, { fields: updateAt(edgeTypes[type].fields ?? [], index, field) });
 
   const removeEdgeField = (type: string, index: number) =>
-    updateEdgeType(type, {
-      fields: removeAt(edgeTypes[type].fields ?? [], index),
-    });
+    updateEdgeType(type, { fields: removeAt(edgeTypes[type].fields ?? [], index) });
 
   return (
     <div className={styles.column}>
@@ -86,27 +75,37 @@ export const EdgeTypesEditor: React.FC<Props> = ({ schema }) => {
           <div className={styles.edgeProperties}>
             {(cfg.fields ?? []).map((f, i) => (
               <div key={i} className={styles.edgePropertiesField}>
-                <TextInput
-                  value={f.name}
-                  onChange={(e) => updateEdgeField(type, i, { ...f, name: e.target.value })}
-                />
+                <div className={styles.edgeFieldRow}>
+                  <TextInput
+                    value={f.name}
+                    onChange={(e) => updateEdgeField(type, i, { ...f, name: e.target.value })}
+                  />
 
-                <Select
-                  value={f.type}
-                  onChange={(e) =>
-                    updateEdgeField(type, i, {
-                      ...f,
-                      type: e.target.value as FieldType,
-                    })
-                  }
-                >
-                  <option value="string">string</option>
-                  <option value="number">number</option>
-                  <option value="boolean">boolean</option>
-                  <option value="enum">enum</option>
-                </Select>
+                  <Select
+                    value={f.type}
+                    onChange={(e) =>
+                      updateEdgeField(type, i, {
+                        ...f,
+                        type: e.target.value as FieldType,
+                        options: e.target.value === 'enum' ? (f.options ?? []) : undefined,
+                      })
+                    }
+                  >
+                    <option value="string">string</option>
+                    <option value="number">number</option>
+                    <option value="boolean">boolean</option>
+                    <option value="enum">enum</option>
+                  </Select>
 
-                <Button onClick={() => removeEdgeField(type, i)}>🗑</Button>
+                  <Button onClick={() => removeEdgeField(type, i)}>🗑</Button>
+                </div>
+
+                {f.type === 'enum' && (
+                  <EnumOptionsEditor
+                    options={f.options}
+                    onChange={(options) => updateEdgeField(type, i, { ...f, options })}
+                  />
+                )}
               </div>
             ))}
           </div>

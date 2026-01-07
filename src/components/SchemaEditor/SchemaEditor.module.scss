@@ -20,8 +20,10 @@ h3 {
 }
 
 button {
-  margin-top: 1rem;
+  margin: 0.5rem;
 }
+
+//edge
 
 .edgeField {
   display: flex;
@@ -29,6 +31,12 @@ button {
   gap: 1rem;
   padding-bottom: 1rem;
   border-bottom: $border-delimiter;
+}
+
+.edgeFieldRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .edgeGeneral {
@@ -44,12 +52,16 @@ button {
 
 .edgePropertiesField {
   display: flex;
-  gap: 0.5rem;
+  flex-direction: column;
+  gap: 4px;
 }
+
+// node
 
 .nodeField {
   display: flex;
-  gap: 1rem;
+  flex-direction: column;
+  gap: 4px;
   padding-bottom: 1rem;
   border-bottom: $border-delimiter;
 
@@ -58,12 +70,27 @@ button {
   }
 }
 
-.fixed {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
+.nodeFieldRow {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
-button {
-  margin: 5px;
+// enum
+
+.enumOptions {
+  margin-left: 16px;
+  margin-top: 4px;
+}
+
+.enumTitle {
+  font-size: 12px;
+  opacity: 0.7;
+  margin-bottom: 4px;
+}
+
+.enumOption {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 4px;
 }
