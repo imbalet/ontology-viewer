@@ -25,6 +25,7 @@ interface OntologyState {
   updateEdge: (edge: Edge) => void;
   removeEdge: (edgeId: EdgeId) => void;
   updateNodesWithHistory: (newNodes: Node[]) => void;
+  updateEdgesWithHistory: (newEdges: Edge[]) => void;
 
   selectNode: (nodeId?: NodeId) => void;
   selectEdge: (edgeId?: EdgeId) => void;
@@ -156,6 +157,19 @@ export const useOntologyStore = create<OntologyState>((set) => ({
       const newOntology: Ontology = {
         ...state.ontology,
         nodes: newNodes,
+      };
+
+      return { ...state, ...pushHistory(state, newOntology) };
+    });
+  },
+
+  updateEdgesWithHistory: (newEdges: Edge[]) => {
+    set((state) => {
+      if (!state.ontology) return state;
+
+      const newOntology: Ontology = {
+        ...state.ontology,
+        edges: newEdges,
       };
 
       return { ...state, ...pushHistory(state, newOntology) };
