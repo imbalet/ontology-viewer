@@ -21,40 +21,42 @@ export const SchemaFieldEditor: React.FC<Props> = ({ field, onChange, onRename, 
   }, [field.name]);
 
   return (
-    <div className={styles.fieldRow}>
-      <TextInput
-        value={editingValue}
-        placeholder="name"
-        onChange={(e) => setEditingValue(e.target.value)}
-        onBlur={() => onRename(field.name, editingValue)}
-      />
-
-      <Select
-        value={field.type}
-        onChange={(e) =>
-          onChange({
-            ...field,
-            type: e.target.value as FieldType,
-            options: e.target.value === 'enum' ? (field.options ?? []) : undefined,
-          })
-        }
-      >
-        <option value="string">string</option>
-        <option value="number">number</option>
-        <option value="boolean">boolean</option>
-        <option value="enum">enum</option>
-      </Select>
-
-      <label>
-        <input
-          type="checkbox"
-          checked={field.required ?? false}
-          onChange={(e) => onChange({ ...field, required: e.target.checked })}
+    <div className={styles.field}>
+      <div className={styles.fieldRow}>
+        <TextInput
+          value={editingValue}
+          placeholder="name"
+          onChange={(e) => setEditingValue(e.target.value)}
+          onBlur={() => onRename(field.name, editingValue)}
         />
-        required
-      </label>
 
-      <Button onClick={onRemove}>🗑</Button>
+        <Select
+          value={field.type}
+          onChange={(e) =>
+            onChange({
+              ...field,
+              type: e.target.value as FieldType,
+              options: e.target.value === 'enum' ? (field.options ?? []) : undefined,
+            })
+          }
+        >
+          <option value="string">string</option>
+          <option value="number">number</option>
+          <option value="boolean">boolean</option>
+          <option value="enum">enum</option>
+        </Select>
+
+        <label>
+          <input
+            type="checkbox"
+            checked={field.required ?? false}
+            onChange={(e) => onChange({ ...field, required: e.target.checked })}
+          />
+          required
+        </label>
+
+        <Button onClick={onRemove}>🗑</Button>
+      </div>
 
       {field.type === 'enum' && (
         <EnumOptionsEditor

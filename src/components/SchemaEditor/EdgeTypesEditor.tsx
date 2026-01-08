@@ -19,7 +19,7 @@ export const EdgeTypesEditor: React.FC<Props> = ({ schema }) => {
   const [editingTypes, setEditingTypes] = useState<Record<string, string>>(() =>
     Object.fromEntries(Object.entries(edgeTypes).map(([type, cfg]) => [cfg.id, type]))
   );
-  
+
   React.useEffect(() => {
     setEditingTypes(
       Object.fromEntries(Object.entries(edgeTypes).map(([type, cfg]) => [cfg.id, type]))
@@ -138,7 +138,7 @@ export const EdgeTypesEditor: React.FC<Props> = ({ schema }) => {
           const editingType = editingTypes[cfg.id] ?? type;
 
           return (
-            <div key={cfg.id} className={styles.edgeField}>
+            <div key={cfg.id} className={styles.field}>
               <div className={styles.edgeGeneral}>
                 <TextInput
                   value={editingType}

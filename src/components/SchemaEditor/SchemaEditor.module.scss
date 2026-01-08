@@ -25,20 +25,6 @@ button {
 
 //edge
 
-.edgeField {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  padding-bottom: 1rem;
-  border-bottom: $border-delimiter;
-}
-
-.edgeFieldRow {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
 .edgeGeneral {
   display: flex;
   gap: 1rem;
@@ -50,27 +36,21 @@ button {
   gap: 0.5rem;
 }
 
-.edgePropertiesField {
+// fields
+
+.field {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-}
-
-// node
-
-.nodeField {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+  gap: 1rem;
   padding-bottom: 1rem;
   border-bottom: $border-delimiter;
 
-  &:last-of-type {
-    border-bottom: none;
-  }
+  // &:last-of-type {
+  //   border-bottom: none;
+  // }
 }
 
-.nodeFieldRow {
+.fieldRow {
   display: flex;
   align-items: center;
   gap: 1rem;
