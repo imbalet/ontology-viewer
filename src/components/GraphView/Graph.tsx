@@ -15,6 +15,7 @@ import { ContextMenu } from '../ContextMenu/ContextMenu';
 import { getEdgeStyle } from './edgeStyles';
 import { getNodeStyle } from './nodeStyles';
 import { getHighlights } from './highlightUtils';
+import { createDefaultValues } from '../../models/defaultValues';
 import styles from './Graph.module.scss';
 
 export const GraphView: React.FC = () => {
@@ -148,6 +149,7 @@ export const GraphView: React.FC = () => {
       source: params.source,
       target: params.target,
       type: defaultType,
+      properties: createDefaultValues(ontology.schema.edgeTypes[defaultType]?.fields || []),
     });
   };
 
