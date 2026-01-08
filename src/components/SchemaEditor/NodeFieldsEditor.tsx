@@ -1,12 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useOntologyStore } from '../../state/useOntologyStore';
 import type { SchemaField, Ontology } from '../../models/ontology';
-import { TextInput } from '../TextInput/TextInput';
-import { Select } from '../Select/Select';
 import { Button } from '../Button/Button';
 import { emptyField, updateAt, removeAt } from './schemaUtils';
-import type { FieldType } from './types';
-import { EnumOptionsEditor } from './EnumOptionsEditor';
+import { SchemaFieldEditor } from './SchemaFieldEditor';
 import styles from './SchemaEditor.module.scss';
 
 interface Props {
@@ -51,56 +48,15 @@ export const NodeFieldsEditor: React.FC<Props> = ({ schema }) => {
     <div className={styles.column}>
       <h3>Node Fields</h3>
 
-      {nodeFields.map((f, i) => {
-        const [editingValue, setEditingValue] = useState(f.name);
-
-        return (
-          <div key={i} className={styles.nodeField}>
-            <div className={styles.nodeFieldRow}>
-              <TextInput
-                value={editingValue}
-                placeholder="name"
-                onChange={(e) => setEditingValue(e.target.value)}
-                onBlur={() => renameNodeField(f.name, editingValue)}
-              />
-
-              <Select
-                value={f.type}
-                onChange={(e) =>
-                  updateNodeField(i, {
-                    ...f,
-                    type: e.target.value as FieldType,
-                    options: e.target.value === 'enum' ? (f.options ?? []) : undefined,
-                  })
-                }
-              >
-                <option value="string">string</option>
-                <option value="number">number</option>
-                <option value="boolean">boolean</option>
-                <option value="enum">enum</option>
-              </Select>
-
-              <label>
-                <input
-                  type="checkbox"
-                  checked={f.required ?? false}
-                  onChange={(e) => updateNodeField(i, { ...f, required: e.target.checked })}
-                />
-                required
-              </label>
-
-              <Button onClick={() => removeNodeField(i)}>🗑</Button>
-            </div>
-
-            {f.type === 'enum' && (
-              <EnumOptionsEditor
-                options={f.options}
-                onChange={(options) => updateNodeField(i, { ...f, options })}
-              />
-            )}
-          </div>
-        );
-      })}
+      {nodeFields.map((f, i) => (
+        <SchemaFieldEditor
+          key={f.id}
+          field={f}
+          onChange={(field) => updateNodeField(i, field)}
+          onRename={(oldName, newName) => renameNodeField(oldName, newName)}
+          onRemove={() => removeNodeField(i)}
+        />
+      ))}
 
       <Button onClick={addNodeField}>+ Add field</Button>
     </div>

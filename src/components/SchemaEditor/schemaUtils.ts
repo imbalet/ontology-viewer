@@ -1,6 +1,7 @@
 import type { SchemaField } from '../../models/ontology';
 
 export const emptyField = (): SchemaField => ({
+  id: crypto.randomUUID(),
   name: '',
   type: 'string',
   required: false,

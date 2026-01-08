@@ -1,6 +1,8 @@
 export type NodeId = string;
 export type EdgeId = string;
 
+export type FieldType = 'string' | 'number' | 'boolean' | 'enum';
+
 export interface Node {
   id: NodeId;
   type: 'Skill';
@@ -21,8 +23,9 @@ export interface Edge {
 }
 
 export interface SchemaField {
+  id: string;
   name: string;
-  type: 'string' | 'number' | 'enum' | 'boolean';
+  type: FieldType;
   options?: string[];
   required?: boolean;
 }
@@ -31,6 +34,7 @@ export interface Schema {
   nodeFields: SchemaField[];
   edgeTypes: {
     [type: string]: {
+      id: string;
       directed: boolean;
       fields?: SchemaField[];
     };

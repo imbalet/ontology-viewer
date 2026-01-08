@@ -2,11 +2,10 @@ import React, { useState } from 'react';
 import { useOntologyStore } from '../../state/useOntologyStore';
 import type { SchemaField, Ontology } from '../../models/ontology';
 import { TextInput } from '../TextInput/TextInput';
-import { Select } from '../Select/Select';
 import { Button } from '../Button/Button';
 import { emptyField, updateAt, removeAt } from './schemaUtils';
-import type { EdgeTypeConfig, FieldType } from './types';
-import { EnumOptionsEditor } from './EnumOptionsEditor';
+import type { EdgeTypeConfig } from './types';
+import { SchemaFieldEditor } from './SchemaFieldEditor';
 import styles from './SchemaEditor.module.scss';
 
 interface Props {
@@ -17,16 +16,21 @@ export const EdgeTypesEditor: React.FC<Props> = ({ schema }) => {
   const updateSchema = useOntologyStore((s) => s.updateSchema);
   const { edgeTypes } = schema;
 
-  /* ---------- edge types ---------- */
+  const [editingTypes, setEditingTypes] = useState<Record<string, string>>(() =>
+    Object.fromEntries(Object.entries(edgeTypes).map(([type, cfg]) => [cfg.id, type]))
+  );
 
   const addEdgeType = () =>
-    updateSchema((s) => ({
-      ...s,
-      edgeTypes: {
-        ...s.edgeTypes,
-        [`edge_${Date.now()}`]: { directed: true, fields: [] },
-      },
-    }));
+    updateSchema((s) => {
+      const id = `edge_${Date.now()}`;
+      return {
+        ...s,
+        edgeTypes: {
+          ...s.edgeTypes,
+          [id]: { id, directed: true, fields: [] },
+        },
+      };
+    });
 
   const updateEdgeType = (type: string, patch: Partial<EdgeTypeConfig>) =>
     updateSchema((s) => ({
@@ -70,8 +74,6 @@ export const EdgeTypesEditor: React.FC<Props> = ({ schema }) => {
     // TODO: change saving in history
     updateEdgesWithHistory(newEdges);
   };
-
-  /* ---------- fields ---------- */
 
   const addEdgeField = (type: string) =>
     updateEdgeType(type, {
@@ -120,100 +122,56 @@ export const EdgeTypesEditor: React.FC<Props> = ({ schema }) => {
     updateEdgesWithHistory(newEdges);
   };
 
-  /* ---------- render ---------- */
-
   return (
     <div className={styles.column}>
       <h3>Edge Types</h3>
 
-      {Object.entries(edgeTypes).map(([type, cfg]) => {
-        const [editingType, setEditingType] = useState(type);
+      {Object.entries(edgeTypes)
+        .sort(([aId], [bId]) => aId.localeCompare(bId))
+        .map(([type, cfg]) => {
+          const editingType = editingTypes[cfg.id] ?? type;
 
-        return (
-          <div key={type} className={styles.edgeField}>
-            {/* ---------- edge general ---------- */}
-            <div className={styles.edgeGeneral}>
-              <TextInput
-                value={type}
-                onChange={(e) => setEditingType(e.target.value)}
-                onBlur={() => renameEdgeType(type, editingType)}
-              />
-
-              <label>
-                <input
-                  type="checkbox"
-                  checked={cfg.directed}
-                  onChange={(e) => updateEdgeType(type, { directed: e.target.checked })}
+          return (
+            <div key={cfg.id} className={styles.edgeField}>
+              <div className={styles.edgeGeneral}>
+                <TextInput
+                  value={editingType}
+                  onChange={(e) =>
+                    setEditingTypes((prev) => ({ ...prev, [cfg.id]: e.target.value }))
+                  }
+                  onBlur={() => {
+                    renameEdgeType(type, editingTypes[cfg.id]);
+                  }}
                 />
-                directed
-              </label>
 
-              <Button onClick={() => removeEdgeType(type)}>🗑</Button>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={cfg.directed}
+                    onChange={(e) => updateEdgeType(type, { directed: e.target.checked })}
+                  />
+                  directed
+                </label>
+
+                <Button onClick={() => removeEdgeType(type)}>🗑</Button>
+              </div>
+
+              <div className={styles.edgeProperties}>
+                {(cfg.fields ?? []).map((f, i) => (
+                  <SchemaFieldEditor
+                    key={i}
+                    field={f}
+                    onChange={(field) => updateEdgeField(type, i, field)}
+                    onRename={(oldName, newName) => renameEdgeField(type, oldName, newName)}
+                    onRemove={() => removeEdgeField(type, i)}
+                  />
+                ))}
+              </div>
+
+              <Button onClick={() => addEdgeField(type)}>+ Add field</Button>
             </div>
-
-            {/* ---------- edge fields ---------- */}
-            <div className={styles.edgeProperties}>
-              {(cfg.fields ?? []).map((f, i) => {
-                const [editingValue, setEditingValue] = useState(f.name);
-
-                return (
-                  <div key={f.name} className={styles.edgePropertiesField}>
-                    <div className={styles.edgeFieldRow}>
-                      <TextInput
-                        value={f.name}
-                        placeholder="name"
-                        onChange={(e) => setEditingValue(e.target.value)}
-                        onBlur={() => renameEdgeField(type, f.name, editingValue)}
-                      />
-
-                      <Select
-                        value={f.type}
-                        onChange={(e) =>
-                          updateEdgeField(type, i, {
-                            ...f,
-                            type: e.target.value as FieldType,
-                            options: e.target.value === 'enum' ? (f.options ?? []) : undefined,
-                          })
-                        }
-                      >
-                        <option value="string">string</option>
-                        <option value="number">number</option>
-                        <option value="boolean">boolean</option>
-                        <option value="enum">enum</option>
-                      </Select>
-
-                      <label>
-                        <input
-                          type="checkbox"
-                          checked={f.required ?? false}
-                          onChange={(e) =>
-                            updateEdgeField(type, i, {
-                              ...f,
-                              required: e.target.checked,
-                            })
-                          }
-                        />
-                        required
-                      </label>
-
-                      <Button onClick={() => removeEdgeField(type, i)}>🗑</Button>
-                    </div>
-
-                    {f.type === 'enum' && (
-                      <EnumOptionsEditor
-                        options={f.options}
-                        onChange={(options) => updateEdgeField(type, i, { ...f, options })}
-                      />
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-
-            <Button onClick={() => addEdgeField(type)}>+ Add field</Button>
-          </div>
-        );
-      })}
+          );
+        })}
 
       <Button onClick={addEdgeType}>+ Add edge type</Button>
     </div>
