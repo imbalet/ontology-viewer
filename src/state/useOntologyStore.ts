@@ -2,6 +2,9 @@ import { create } from 'zustand';
 import type { Ontology, Node, Edge, NodeId, EdgeId } from '../models/ontology';
 import { applyAutoLayout } from '../utils/layout';
 
+const MAX_HISTORY = 70;
+const HISTORY_DEBOUNCE_MS = 400;
+
 interface ContextMenuState {
   type: 'node' | 'edge' | 'pane' | null;
   targetId?: string | null;
@@ -48,12 +51,26 @@ const hasAllPositions = (nodes: Node[]) =>
   nodes.every((n) => n.position && typeof n.position.x === 'number');
 
 // helper: push current ontology to undo stack
-const pushHistory = (state: OntologyState, newOntology: Ontology) => ({
-  ontology: newOntology,
-  undoStack: [...state.undoStack, state.ontology!],
+let lastHistoryCommit = 0;
 
-  redoStack: [],
-});
+const pushHistory = (state: OntologyState, newOntology: Ontology) => {
+  const now = Date.now();
+  if (now - lastHistoryCommit < HISTORY_DEBOUNCE_MS) {
+    return {
+      ontology: newOntology,
+    };
+  }
+
+  lastHistoryCommit = now;
+
+  const newUndoStack = [...state.undoStack, state.ontology!];
+
+  return {
+    ontology: newOntology,
+    undoStack: newUndoStack.length > MAX_HISTORY ? newUndoStack.slice(-MAX_HISTORY) : newUndoStack,
+    redoStack: [],
+  };
+};
 
 export const useOntologyStore = create<OntologyState>((set) => ({
   ontology: null,
@@ -204,7 +221,9 @@ export const useOntologyStore = create<OntologyState>((set) => ({
         ...state,
         ontology: previous,
         undoStack: newUndo,
-        redoStack: state.ontology ? [...state.redoStack, state.ontology] : state.redoStack,
+        redoStack: state.ontology
+          ? [...state.redoStack, state.ontology].slice(-MAX_HISTORY)
+          : state.redoStack,
       };
     }),
 
@@ -216,7 +235,9 @@ export const useOntologyStore = create<OntologyState>((set) => ({
       return {
         ...state,
         ontology: next,
-        undoStack: state.ontology ? [...state.undoStack, state.ontology] : state.undoStack,
+        undoStack: state.ontology
+          ? [...state.undoStack, state.ontology].slice(-MAX_HISTORY)
+          : state.undoStack,
         redoStack: newRedo,
       };
     }),

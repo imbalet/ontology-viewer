@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { TextInput } from '../TextInput/TextInput';
 import { Select } from '../Select/Select';
 import { Button } from '../Button/Button';
@@ -15,6 +15,10 @@ interface Props {
 
 export const SchemaFieldEditor: React.FC<Props> = ({ field, onChange, onRename, onRemove }) => {
   const [editingValue, setEditingValue] = useState(field.name);
+
+  useEffect(() => {
+    setEditingValue(field.name);
+  }, [field.name]);
 
   return (
     <div className={styles.fieldRow}>
