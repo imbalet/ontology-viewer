@@ -52,7 +52,12 @@ export const Toolbar: React.FC = () => {
 
       importOntology(file)
         .then((incoming) => {
-          mergeOntology(incoming);
+          const wantMerge = window.confirm(
+            'Вы уверены, что хотите объединить текущую онтологию с импортируемой?'
+          );
+          if (wantMerge) {
+            mergeOntology(incoming);
+          }
         })
         .catch((err) => alert(err.message))
         .finally(() => {
