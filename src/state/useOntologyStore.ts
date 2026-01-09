@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { Ontology, Node, Edge, NodeId, EdgeId } from '../models/ontology';
 import { applyAutoLayout } from '../utils/layout';
+import { mergeOntology as mergeFn } from '../utils/ontologyMerge/mergeOntology';
 
 const MAX_HISTORY = 70;
 const HISTORY_DEBOUNCE_MS = 400;
@@ -20,6 +21,8 @@ interface OntologyState {
   redoStack: Ontology[];
 
   loadOntology: (data: Ontology) => void;
+  mergeOntology: (incoming: Ontology) => void;
+
   addNode: (node: Node) => void;
   updateNode: (node: Node) => void;
   removeNode: (nodeId: NodeId) => void;
@@ -98,6 +101,14 @@ export const useOntologyStore = create<OntologyState>((set) => ({
         undoStack: [],
         redoStack: [],
       };
+    }),
+
+  mergeOntology: (incoming) =>
+    set((state) => {
+      if (!state.ontology) return state;
+
+      const merged = mergeFn(state.ontology, incoming);
+      return { ...state, ...pushHistory(state, merged) };
     }),
 
   addNode: (node) =>

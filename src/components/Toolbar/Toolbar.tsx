@@ -7,11 +7,13 @@ import styles from './Toolbar.module.scss';
 
 export const Toolbar: React.FC = () => {
   const loadOntology = useOntologyStore((s) => s.loadOntology);
+  const mergeOntology = useOntologyStore((s) => s.mergeOntology);
   const updateNodesWithHistory = useOntologyStore((s) => s.updateNodesWithHistory);
   const undo = useOntologyStore((s) => s.undo);
   const redo = useOntologyStore((s) => s.redo);
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const replaceInputRef = useRef<HTMLInputElement>(null);
+  const mergeInputRef = useRef<HTMLInputElement>(null);
 
   const handleNew = useCallback(() => {
     if (!confirmLoseOntology()) return;
@@ -23,16 +25,17 @@ export const Toolbar: React.FC = () => {
     });
   }, [loadOntology]);
 
-  const handleImport = useCallback(
+  const handleReplaceImport = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (!e.target.files?.[0]) return;
+      const file = e.target.files?.[0];
+      if (!file) return;
 
       if (!confirmLoseOntology()) {
         e.target.value = '';
         return;
       }
 
-      importOntology(e.target.files[0])
+      importOntology(file)
         .then(loadOntology)
         .catch((err) => alert(err.message))
         .finally(() => {
@@ -42,16 +45,31 @@ export const Toolbar: React.FC = () => {
     [loadOntology]
   );
 
+  const handleMergeImport = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      importOntology(file)
+        .then((incoming) => {
+          mergeOntology(incoming);
+        })
+        .catch((err) => alert(err.message))
+        .finally(() => {
+          e.target.value = '';
+        });
+    },
+    [mergeOntology]
+  );
+
   const handleExport = useCallback(() => {
-    const state = useOntologyStore.getState();
-    const ontology = state.ontology;
+    const { ontology } = useOntologyStore.getState();
     if (!ontology) return;
     exportOntology(ontology);
   }, []);
 
   const handleAutoLayout = useCallback(() => {
-    const state = useOntologyStore.getState();
-    const ontology = state.ontology;
+    const { ontology } = useOntologyStore.getState();
     if (!ontology) return;
 
     const newNodes = applyAutoLayout(ontology.nodes, ontology.edges);
@@ -59,8 +77,7 @@ export const Toolbar: React.FC = () => {
   }, [updateNodesWithHistory]);
 
   const confirmLoseOntology = () => {
-    const state = useOntologyStore.getState();
-    const ontology = state.ontology;
+    const { ontology } = useOntologyStore.getState();
 
     if (!ontology || ontology.nodes.length === 0) {
       return true;
@@ -86,15 +103,30 @@ export const Toolbar: React.FC = () => {
 
   return (
     <div className={styles.toolbar}>
+      {/* replace import */}
       <input
         type="file"
         accept=".json"
-        ref={fileInputRef}
+        ref={replaceInputRef}
         style={{ display: 'none' }}
-        onChange={handleImport}
+        onChange={handleReplaceImport}
       />
+
+      {/* merge import */}
+      <input
+        type="file"
+        accept=".json"
+        ref={mergeInputRef}
+        style={{ display: 'none' }}
+        onChange={handleMergeImport}
+      />
+
       <Button onClick={handleNew}>Создать новую</Button>
-      <Button onClick={() => fileInputRef.current?.click()}>Загрузить</Button>
+
+      <Button onClick={() => replaceInputRef.current?.click()}>Загрузить (заменить)</Button>
+
+      <Button onClick={() => mergeInputRef.current?.click()}>Импортировать в текущую</Button>
+
       <Button onClick={handleExport}>Export</Button>
       <Button onClick={handleAutoLayout}>Auto-layout</Button>
       <Button onClick={undo}>Undo</Button>
