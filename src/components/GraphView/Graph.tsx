@@ -17,6 +17,7 @@ import { getNodeStyle } from './nodeStyles';
 import { getHighlights } from './highlightUtils';
 import { createDefaultValues } from '../../models/defaultValues';
 import styles from './Graph.module.scss';
+import type { Schema, Node } from '../../models/ontology';
 
 export const GraphView: React.FC = () => {
   const reactFlowWrapperRef = useRef<HTMLDivElement>(null);
@@ -39,6 +40,21 @@ export const GraphView: React.FC = () => {
 
   const hasOntology = ontology !== null;
 
+  const getNodeLabel = (node: Node, schema: Schema): string => {
+    if (typeof node.properties?.name === 'string' && node.properties.name.trim()) {
+      return node.properties.name;
+    }
+    const firstStringField = schema.nodeFields.find((f) => f.type === 'string');
+    if (firstStringField) {
+      const value = node.properties?.[firstStringField.name];
+      if (typeof value === 'string' && value.trim()) {
+        return value;
+      }
+    }
+
+    return node.id;
+  };
+
   useEffect(() => {
     if (!ontology) return;
 
@@ -53,7 +69,9 @@ export const GraphView: React.FC = () => {
       ontology.nodes.map((n) => ({
         id: n.id,
         type: 'default',
-        data: { label: n.properties.name || n.id },
+        data: {
+          label: getNodeLabel(n, ontology.schema),
+        },
         position: n.position,
         selected: n.id === selectedNodeId,
         style: getNodeStyle({
