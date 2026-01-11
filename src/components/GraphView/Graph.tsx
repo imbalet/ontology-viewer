@@ -12,8 +12,8 @@ import ReactFlow, {
 import 'reactflow/dist/style.css';
 import { useOntologyStore } from '../../state/useOntologyStore';
 import { ContextMenu } from '../ContextMenu/ContextMenu';
-import { getEdgeStyle } from './edgeStyles';
-import { getNodeStyle } from './nodeStyles';
+import { edgeBehavior, getEdgeClassName } from './edgeStyles';
+import { getNodeClassName } from './nodeStyles';
 import { getHighlights } from './highlightUtils';
 import { createDefaultValues } from '../../models/defaultValues';
 import styles from './Graph.module.scss';
@@ -74,12 +74,9 @@ export const GraphView: React.FC = () => {
       ontology.nodes.map((n) => ({
         id: n.id,
         type: 'default',
-        data: {
-          label: getNodeLabel(n, ontology.schema),
-        },
+        data: { label: getNodeLabel(n, ontology.schema) },
         position: n.position,
-        selected: n.id === selectedNodeId,
-        style: getNodeStyle({
+        className: getNodeClassName({
           selected: n.id === selectedNodeId,
           highlighted: highlightedNodes.has(n.id),
         }),
@@ -87,18 +84,17 @@ export const GraphView: React.FC = () => {
     );
 
     setEdges(
-      ontology.edges.map(
-        (e) =>
-          ({
-            id: e.id,
-            source: e.source,
-            target: e.target,
-            ...getEdgeStyle(e.type, {
-              selected: e.id === selectedEdgeId,
-              highlighted: highlightedEdges.has(e.id),
-            }),
-          }) as any
-      )
+      ontology.edges.map((e) => ({
+        id: e.id,
+        source: e.source,
+        target: e.target,
+        ...edgeBehavior[e.type],
+        className: getEdgeClassName(e.type, {
+          selected: e.id === selectedEdgeId,
+          highlighted: highlightedEdges.has(e.id),
+        }),
+        label: e.type,
+      }))
     );
   }, [ontology, selectedNodeId, selectedEdgeId]);
 

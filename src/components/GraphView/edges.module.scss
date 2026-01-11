@@ -1,0 +1,58 @@
+@use '../../styles/variables';
+
+.edge {
+  rect {
+    stroke-width: 1px;
+  }
+
+  path {
+    stroke-width: 2;
+    transition:
+      stroke 0.15s ease,
+      stroke-width 0.15s ease;
+  }
+
+  text {
+    fill: variables.$edge-text-color;
+    font-size: 12px;
+    transition: fill 0.15s ease;
+  }
+
+  /* ===== types ===== */
+
+  &--includes path {
+    stroke: variables.$edge-color-includes;
+  }
+
+  &--requires path {
+    stroke: variables.$edge-color-requires;
+    stroke-dasharray: 5 5;
+  }
+
+  &--related_to path {
+    stroke: variables.$edge-color-related_to;
+  }
+
+  &--default path {
+    stroke: variables.$edge-color-default;
+  }
+
+  /* ===== states ===== */
+
+  &--selected text {
+    font-weight: bold;
+    fill: variables.$edge-text-color-selected;
+  }
+
+  &--selected path {
+    stroke-width: 3;
+  }
+
+  &--selected rect {
+    stroke: variables.$edge-color-selected;
+  }
+
+  &--highlighted rect {
+    stroke: variables.$edge-color-highlighted;
+  }
+}

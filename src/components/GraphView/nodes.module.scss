@@ -1,0 +1,22 @@
+@use '../../styles/variables';
+
+.node {
+  border: 1px solid transparent;
+  padding: 8px 12px;
+  border-radius: 4px;
+  background-color: variables.$node-bg-color;
+  transition:
+    border 0.15s ease,
+    background-color 0.15s ease;
+
+  &--selected {
+    border-color: variables.$node-border-color-selected;
+    background-color: variables.$node-bg-color-selected;
+    color: variables.$node-text-color-selected;
+  }
+
+  &--highlighted {
+    border-color: variables.$node-border-color-highlighted;
+    background-color: variables.$node-bg-color-highlighted;
+  }
+}

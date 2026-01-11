@@ -1,20 +1,15 @@
-import { type CSSProperties } from 'react';
+import clsx from 'clsx';
+import styles from './nodes.module.scss';
 
 interface NodeStyleOptions {
   selected?: boolean;
   highlighted?: boolean;
 }
 
-export function getNodeStyle(options: NodeStyleOptions = {}): CSSProperties {
-  const { selected, highlighted } = options;
-
-  if (selected) {
-    return { border: '2px solid #f00', padding: 4, backgroundColor: '#ffe' };
-  }
-
-  if (highlighted) {
-    return { border: '2px solid #f90', padding: 4, backgroundColor: '#fff8e1' };
-  }
-
-  return {};
+export function getNodeClassName({ selected, highlighted }: NodeStyleOptions = {}) {
+  return clsx(
+    styles.node,
+    selected && styles['node--selected'],
+    highlighted && styles['node--highlighted']
+  );
 }

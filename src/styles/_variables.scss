@@ -38,3 +38,21 @@ $border: 1px solid $border-color;
 $border-delimiter: 1px solid $border-delimiter-color;
 
 $box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+// nodes and edges colors
+
+$node-border-color-selected: #f00;
+$node-border-color-highlighted: #f90;
+$node-bg-color: #ffffff;
+$node-bg-color-selected: #ffe;
+$node-bg-color-highlighted: #fff8e1;
+$edge-color-includes: #2b6cb0;
+$edge-color-requires: #c53030;
+$edge-color-related_to: #4a5568;
+$edge-color-default: #999;
+$edge-color-selected: #f00;
+$edge-color-highlighted: #f90;
+$edge-text-color: #333;
+$node-text-color: #333;
+$node-text-color-selected: #c53030;
+$edge-text-color-selected: #c53030;
