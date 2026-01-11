@@ -1,73 +1,365 @@
-# React + TypeScript + Vite
+# Ontology Viewer — Визуальный редактор онтологий навыков и компетенций
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**Ontology Viewer** — это веб-приложение для визуального создания, редактирования и анализа онтологий знаний и навыков. Приложение работает полностью в браузере, без необходимости в сервере, и позволяет работать с графами навыков как с интерактивными диаграммами.
 
-Currently, two official plugins are available:
+## Назначение и возможности
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Приложение решает следующие задачи:
 
-## React Compiler
+- **Создание и редактирование графов навыков** — визуальное добавление узлов (навыков) и связей между ними
+- **Гибкая схема данных** — структура узлов и типы связей определяются схемой, что позволяет использовать приложение для разных предметных областей без изменения кода
+- **Импорт и экспорт JSON** — загрузка и сохранение онтологий в стандартном JSON формате
+- **Интерактивное отображение** — масштабирование, перемещение, автоматическая раскладка графа
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Что такое онтология?
 
-## Expanding the ESLint configuration
+В контексте этого приложения **онтология** — это структурированное описание знаний в виде **семантически типизированного ориентированного графа**:
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- **Узлы (Nodes)** — навыки, знания, компетенции (например: "Python", "Алгоритмы")
+- **Связи (Edges)** — типизированные отношения между навыками:
+  - `includes` — "включает в себя / состоит из"
+  - `requires` — "требует знания / пререквизит"
+  - `related_to` — "связан с"
+- **Схема (Schema)** — описание структуры: какие поля есть у узлов, какие типы связей допустимы
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+Вся информация хранится в одном JSON-файле и может быть легко экспортирована или обработана другими инструментами.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## Быстрый старт
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Установка зависимостей
+
+```bash
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Запуск в режиме разработки
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm run dev
 ```
+
+Приложение откроется по адресу `http://localhost:5173` (или другому, если 5173 занят).
+
+### Сборка для продакшена
+
+```bash
+npm run build
+```
+
+Результат будет в папке `dist/`.
+
+## Как использовать приложение
+
+### 1. Загрузка или создание онтологии
+
+#### Создание пустой онтологии
+
+- Нажмите кнопку **"Create New"** на панели инструментов
+- Вы получите пустую онтологию со пустой схемой
+
+#### Загрузка существующей онтологии
+
+- Нажмите **"Load"** и выберите JSON-файл
+- Приложение загрузит схему, узлы и связи
+- Граф автоматически отобразится на экране
+
+#### Объединение онтологий
+
+- Нажмите **"Import"** чтобы добавить узлы и связи из другого файла
+- При слиянии приложение попытается объединить схемы
+
+### 2. Работа с графом
+
+#### Навигация
+
+- **Масштабирование**: колесо мыши или кнопки на панели управления
+- **Перемещение (Pan)**: левая кнопка мыши
+
+#### Выбор элементов
+
+- **Левый клик на узел** — выделение узла и отображение его свойств в форме редактирования
+- **Левый клик на связь** — выделение связи и отображение её типа и свойств
+- **Левый клик на пустое место** — снятие выделения
+
+#### Контекстное меню
+
+- **Правый клик на пустом месте** - контекстное меню добавления узла
+- **Правый клик на узле** - контекстное меню удаления узла
+- **Правый клик на связи** - контекстное меню удаления связи
+
+#### Горячие клавиши
+
+- **delete / backspace** - удаление выделенного узла или связи
+- **CTRL+Z** - отменить действие (undo)
+- **CTRL+Y / CTRL+SHIFT+Z** - redo
+- **ESC** - снять выделение, закрыть контекстное меню
+
+#### Редактирование узла или связи
+
+1. Выберите узел или связь на графе (левый клик)
+2. Отредактируйте его поля в боковой панели справа
+3. Изменения применяются сразу
+
+#### Создание связи
+
+1. Перетащите стрелку от узла-источника на узел-получатель
+2. Новая связь будет создана со стандартным типом
+3. Измените тип и свойства связи в боковой панели справа
+
+#### Редактирование связи
+
+1. Кликните на связь (линию между узлами)
+2. В боковой панели справа измените тип связи или другие свойства
+3. Изменения применяются сразу
+
+### 3. Использование схемы
+
+#### Что такое схема?
+
+Схема определяет:
+
+- Какие **поля** есть у узлов (например: "name", "category", "description")
+- Какие **типы связей** допустимы (например: "includes", "requires", "related_to")
+- Какие **поля** есть у каждого типа связи
+- Свойства полей
+
+#### Редактирование схемы
+
+Нажмите на вкладку **"Schema Editor"** для редактирования структуры:
+
+- **Node Fields** — добавление/удаление полей узлов
+- **Edge Types** — добавление/удаление типов связей и их свойств
+
+При редактировании схемы новые поля автоматически появляются в формах редактирования узлов и связей.
+
+### 4. Сохранение и экспорт
+
+#### Экспорт онтологии
+
+- Нажмите **"Export"**
+- JSON-файл с полной онтологией загрузится на ваш компьютер
+- Файл содержит схему, все узлы, координаты позиций и связи
+
+## Структура данных (JSON формат)
+
+### Пример валидной онтологии:
+
+```json
+{
+  "schema": {
+    "nodeFields": [
+      {
+        "name": "name",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "category",
+        "type": "enum",
+        "options": ["programming", "math", "tool"],
+        "required": false
+      },
+      {
+        "name": "description",
+        "type": "string",
+        "required": false
+      }
+    ],
+    "edgeTypes": {
+      "includes": {
+        "directed": true,
+        "fields": []
+      },
+      "requires": {
+        "directed": true,
+        "fields": []
+      },
+      "related_to": {
+        "directed": false,
+        "fields": []
+      }
+    }
+  },
+  "nodes": [
+    {
+      "id": "1",
+      "type": "Skill",
+      "properties": {
+        "name": "Python",
+        "category": "programming",
+        "description": "Язык программирования"
+      },
+      "position": {
+        "x": 75,
+        "y": 25
+      }
+    },
+    {
+      "id": "2",
+      "type": "Skill",
+      "properties": {
+        "name": "Списки и массивы",
+        "category": "programming"
+      },
+      "position": {
+        "x": 75,
+        "y": 125
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "source": "1",
+      "target": "2",
+      "type": "includes",
+      "properties": {}
+    }
+  ]
+}
+```
+
+### Описание структуры:
+
+```json
+{
+  "schema": {
+    "nodeFields": [],
+    "edgeTypes": {}
+  },
+  "nodes": [],
+  "edges": []
+}
+```
+
+#### Schema
+
+```json
+{
+  "schema": {
+    "nodeFields": [
+      {
+        "name": "name",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "category",
+        "type": "enum",
+        "options": ["programming", "math", "tool"],
+        "required": false
+      }
+    ],
+    "edgeTypes": {
+      "includes": {
+        "directed": true,
+        "fields": []
+      }
+    }
+  }
+}
+```
+
+- **nodeFields** — массив полей узлов
+  - `name` — имя поля (используется в формах)
+  - `type` — тип: `string`, `number`, `boolean`, `enum`
+  - `required` — обязательно ли поле
+  - `options` — для `enum`: список допустимых значений
+
+- **edgeTypes** — объект с описанием типов связей
+  - `directed` — если `true`, связь направленная (стрелка в одну сторону)
+  - `fields` — поля связи (аналогично nodeFields)
+
+#### Nodes
+
+```json
+{
+  "nodes": [
+    {
+      "id": "1",
+      "type": "Skill",
+      "properties": {
+        "name": "Python",
+        "category": "programming",
+        "description": "Язык программирования"
+      },
+      "position": {
+        "x": 75,
+        "y": 25
+      }
+    }
+  ]
+}
+```
+
+- **id** — уникальный идентификатор узла
+- **type** — всегда `"Skill"` (в текущей версии)
+- **properties** — объект с данными, определяемыми схемой
+- **position** — объект `{ x, y }` с координатами визуализации
+
+#### Edges
+
+```json
+{
+  "edges": [
+    {
+      "id": "e1",
+      "source": "1",
+      "target": "2",
+      "type": "includes",
+      "properties": {}
+    }
+  ]
+}
+```
+
+- **id** — уникальный идентификатор связи
+- **source** — id узла, из которого исходит связь
+- **target** — id узла, на который указывает связь
+- **type** — тип связи (должен быть определён в schema.edgeTypes)
+- **properties** — дополнительные данные связи
+
+## Архитектура приложения
+
+### Технологический стек
+
+- **React 19** — UI компоненты
+- **React Flow 11** — визуализация и взаимодействие с графом
+- **Zustand** — управление глобальным состоянием (хранилище онтологии)
+- **TypeScript** — типизация и безопасность типов
+- **Vite** — сборщик проекта
+- **SCSS** — стилизация
+- **Dagre** — автоматическая раскладка графа
+
+### Ключевые папки и файлы
+
+```
+src/
+├── App.tsx                        # Главный компонент приложения
+├── components/
+│   ├── GraphView/                 # Визуализация графа (React Flow)
+│   ├── Sidebar/                   # Формы редактирования узлов и связей
+│   ├── SchemaEditor/              # Редактор структуры схемы
+│   ├── Toolbar/                   # Панель инструментов (Load, Export, etc)
+│   └── ...другие компоненты
+├── models/
+│   ├── ontology.ts                # Типы данных (Node, Edge, Schema, Ontology)
+│   ├── validation.ts              # Валидация полей
+│   └── defaultValues.ts           # Значения по умолчанию
+├── state/
+│   └── useOntologyStore.ts        # Zustand хранилище с логикой приложения
+├── utils/
+│   ├── jsonIO.ts                  # Импорт/экспорт JSON
+│   ├── layout.ts                  # Автоматическая раскладка (Dagre)
+│   └── ontologyMerge/             # Логика объединения онтологий
+└── styles/
+    └── ...стили и переменные
+```
+
+---
+
+## Дополнительная информация
+
+Важно, в приложении нет многих валидаций и защит от поломки схемы, онтологии и json файла. Пользователю необходимо самому следить за корректностью всех полей, уникальностью значений и тд.
+
+Приложение написано по большей части с применением LLM, часто встречаются нелогичные моменты и костыли. Однако оно было протестировано в большинстве сценариев, найденные ошибки были исправлены.
