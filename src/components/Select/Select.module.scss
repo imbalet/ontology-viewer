@@ -1,16 +1,16 @@
-@import '../../styles/variables';
+@use '../../styles/variables';
 
 .select {
   width: 100%;
   padding: 8px 40px 8px 12px;
-  background-color: $field-bg-color;
-  color: $text-color;
+  background-color: variables.$field-bg-color;
+  color: variables.$text-color;
 
-  border: $border;
+  border: variables.$border;
   border-radius: 6px;
 
-  font-family: $font-family;
-  font-size: $font-size-base;
+  font-family: variables.$font-family;
+  font-size: variables.$font-size-base;
 
   outline: none;
   cursor: pointer;
@@ -24,8 +24,8 @@
   -moz-appearance: none;
 
   background-image:
-    linear-gradient(45deg, transparent 50%, $field-icon-color 50%),
-    linear-gradient(135deg, $field-icon-color 50%, transparent 50%),
+    linear-gradient(45deg, transparent 50%, variables.$field-icon-color 50%),
+    linear-gradient(135deg, variables.$field-icon-color 50%, transparent 50%),
     linear-gradient(to right, transparent, transparent);
   background-position:
     calc(100% - 18px) 50%,
@@ -38,12 +38,12 @@
   background-repeat: no-repeat;
 
   &:hover {
-    border-color: $field-border-color-hover;
+    border-color: variables.$field-border-color-hover;
   }
 
   &:focus {
-    border-color: $primary-color;
-    box-shadow: $box-shadow;
+    border-color: variables.$primary-color;
+    box-shadow: variables.$box-shadow;
   }
 
   &:disabled {
@@ -53,23 +53,23 @@
 }
 
 .active {
-  border-color: $primary-color;
-  background-color: $field-bg-color-active;
+  border-color: variables.$primary-color;
+  background-color: variables.$field-bg-color-active;
 }
 
 .error {
-  border-color: $danger-color;
+  border-color: variables.$danger-color;
 
   &:focus {
-    border-color: $danger-color;
-    box-shadow: $box-shadow;
+    border-color: variables.$danger-color;
+    box-shadow: variables.$box-shadow;
   }
 }
 
 .required {
-  border-color: $danger-color;
+  border-color: variables.$danger-color;
 
   &:hover {
-    border-color: $danger-color-hover;
+    border-color: variables.$danger-color-hover;
   }
 }

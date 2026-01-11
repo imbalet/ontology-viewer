@@ -1,12 +1,12 @@
-@import './variables';
+@use 'variables';
 
 body {
-  font-family: $font-family;
-  font-size: $font-size-base;
-  color: $text-color;
+  font-family: variables.$font-family;
+  font-size: variables.$font-size-base;
+  color: variables.$text-color;
   margin: 0;
   padding: 0;
-  background-color: $background-color;
+  background-color: variables.$background-color;
 }
 
 *,

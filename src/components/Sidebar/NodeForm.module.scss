@@ -1,7 +1,7 @@
-@import '../../styles/variables';
+@use '../../styles/variables';
 
 .container {
-  border: $border;
+  border: variables.$border;
   padding: 10px;
   width: 250px;
 }
@@ -21,11 +21,11 @@
 }
 
 .errorText {
-  color: $error-color;
+  color: variables.$error-color;
   font-size: 12px;
 }
 
 .validationError {
-  color: $error-color;
+  color: variables.$error-color;
   font-size: 12px;
 }
