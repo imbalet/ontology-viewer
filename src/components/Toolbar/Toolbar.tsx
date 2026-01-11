@@ -53,7 +53,7 @@ export const Toolbar: React.FC = () => {
       importOntology(file)
         .then((incoming) => {
           const wantMerge = window.confirm(
-            'Вы уверены, что хотите объединить текущую онтологию с импортируемой?'
+            'Are you sure you want to merge the current ontology with the imported one?'
           );
           if (wantMerge) {
             mergeOntology(incoming);
@@ -89,14 +89,14 @@ export const Toolbar: React.FC = () => {
     }
 
     const wantContinue = window.confirm(
-      'Текущая онтология будет потеряна. Нажмите OK чтобы продолжить.\n\n' +
-        'Рекомендуется сначала экспортировать.'
+      'The current ontology will be lost. Click OK to continue.\n\n' +
+        'It is recommended to export it first.'
     );
 
     if (!wantContinue) return false;
 
     const wantExport = window.confirm(
-      'Хотите экспортировать текущую онтологию перед продолжением?'
+      'Do you want to export the current ontology before continuing?'
     );
 
     if (wantExport) {
@@ -108,7 +108,6 @@ export const Toolbar: React.FC = () => {
 
   return (
     <div className={styles.toolbar}>
-      {/* replace import */}
       <input
         type="file"
         accept=".json"
@@ -117,7 +116,6 @@ export const Toolbar: React.FC = () => {
         onChange={handleReplaceImport}
       />
 
-      {/* merge import */}
       <input
         type="file"
         accept=".json"
@@ -126,11 +124,11 @@ export const Toolbar: React.FC = () => {
         onChange={handleMergeImport}
       />
 
-      <Button onClick={handleNew}>Создать новую</Button>
+      <Button onClick={handleNew}>Create New</Button>
 
-      <Button onClick={() => replaceInputRef.current?.click()}>Загрузить (заменить)</Button>
+      <Button onClick={() => replaceInputRef.current?.click()}>Load (Replace)</Button>
 
-      <Button onClick={() => mergeInputRef.current?.click()}>Импортировать в текущую</Button>
+      <Button onClick={() => mergeInputRef.current?.click()}>Import into Current</Button>
 
       <Button onClick={handleExport}>Export</Button>
       <Button onClick={handleAutoLayout}>Auto-layout</Button>
