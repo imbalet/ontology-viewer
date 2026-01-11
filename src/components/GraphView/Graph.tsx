@@ -1,6 +1,5 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, type RefObject } from 'react';
 import ReactFlow, {
-  ReactFlowProvider,
   MiniMap,
   Controls,
   Background,
@@ -8,6 +7,7 @@ import ReactFlow, {
   useEdgesState,
   type Edge as RFEdge,
   type Node as RFNode,
+  type OnConnectStartParams,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { useOntologyStore } from '../../state/useOntologyStore';
@@ -18,14 +18,19 @@ import { getHighlights } from './highlightUtils';
 import { createDefaultValues } from '../../models/defaultValues';
 import styles from './Graph.module.scss';
 import type { Schema, Node } from '../../models/ontology';
+import { createEmptyNode } from '../../models/createNode';
+import { useReactFlow } from 'reactflow';
+import { generateId } from '../../utils/id';
 
 export const GraphView: React.FC = () => {
+  const screenToFlowPosition = useReactFlow().screenToFlowPosition;
   const reactFlowWrapperRef = useRef<HTMLDivElement>(null);
   const ontology = useOntologyStore((s) => s.ontology);
   const selectNode = useOntologyStore((s) => s.selectNode);
   const selectEdge = useOntologyStore((s) => s.selectEdge);
   const addEdgeToStore = useOntologyStore((s) => s.addEdge);
   const updateNode = useOntologyStore((s) => s.updateNode);
+  const addNode = useOntologyStore((s) => s.addNode);
   const removeNode = useOntologyStore((s) => s.removeNode);
   const removeEdge = useOntologyStore((s) => s.removeEdge);
 
@@ -150,6 +155,8 @@ export const GraphView: React.FC = () => {
 
   const onConnect = (params: any) => {
     if (!ontology) return;
+    connectingNodeId.current = null;
+
     const edgeTypes = Object.keys(ontology.schema.edgeTypes);
     const defaultType = edgeTypes[0] || 'related_to';
 
@@ -162,13 +169,15 @@ export const GraphView: React.FC = () => {
       return;
     }
 
+    const id = `e-${params.source}-${params.target}-${Date.now()}`;
     addEdgeToStore({
-      id: `e-${params.source}-${params.target}-${Date.now()}`,
+      id: id,
       source: params.source,
       target: params.target,
       type: defaultType,
       properties: createDefaultValues(ontology.schema.edgeTypes[defaultType]?.fields || []),
     });
+    selectEdge(id);
   };
 
   function handleContextMenu(type: 'node' | 'edge' | 'pane', id: string | null) {
@@ -198,36 +207,85 @@ export const GraphView: React.FC = () => {
     closeContextMenu();
   };
 
+  const connectingNodeId: RefObject<string | null> = useRef(null);
+
+  const onConnectStart = (_event: any, params: OnConnectStartParams) => {
+    connectingNodeId.current = params.nodeId;
+  };
+
+  const onConnectEndHandler = (event: MouseEvent | TouchEvent) => {
+    if (!connectingNodeId.current || !ontology) return;
+
+    let x: number;
+    let y: number;
+
+    if ('clientX' in event) {
+      // MouseEvent
+      x = event.clientX;
+      y = event.clientY;
+    } else if (event.touches && event.touches.length > 0) {
+      // TouchEvent
+      x = event.touches[0].clientX;
+      y = event.touches[0].clientY;
+    } else {
+      connectingNodeId.current = null;
+      return;
+    }
+
+    const positionInFlow = screenToFlowPosition({ x, y });
+
+    const id = generateId('node');
+    const newNode = createEmptyNode(id, ontology.schema.nodeFields, positionInFlow);
+    addNode(newNode);
+
+    const edgeTypes = Object.keys(ontology.schema.edgeTypes);
+    const defaultType = edgeTypes[0] || 'related_to';
+
+    addEdgeToStore({
+      id: `e-${connectingNodeId.current}-${newNode.id}-${Date.now()}`,
+      source: connectingNodeId.current,
+      target: newNode.id,
+      type: defaultType,
+      properties: createDefaultValues(ontology.schema.edgeTypes[defaultType]?.fields || []),
+    });
+
+    // selectNode(newNode.id);
+    setTimeout(() => {
+      selectNode(newNode.id);
+    }, 0);
+    connectingNodeId.current = null;
+  };
+
   return (
-    <ReactFlowProvider>
-      <div ref={reactFlowWrapperRef} className={styles.container}>
-        {!hasOntology ? (
-          <div className={styles.noOntologyMessage}>Load ontology to view graph</div>
-        ) : (
-          <ReactFlow
-            nodes={nodes}
-            edges={edges}
-            onNodesChange={onNodesChange}
-            onEdgesChange={onEdgesChange}
-            onNodeClick={onNodeClick}
-            onEdgeClick={onEdgeClick}
-            onNodeContextMenu={(event, node) => handleContextMenu('node', node.id)(event)}
-            onEdgeContextMenu={(event, edge) => handleContextMenu('edge', edge.id)(event)}
-            onPaneContextMenu={(event) => handleContextMenu('pane', null)(event)}
-            onPaneClick={onPaneClick}
-            onMoveStart={onMoveStart}
-            onConnect={onConnect}
-            onNodeDragStop={onNodeDragStop}
-            onNodeDragStart={onNodeDragStart}
-            fitView
-          >
-            <MiniMap className={styles.miniMap} />
-            <Controls className={styles.controls} />
-            <Background />
-          </ReactFlow>
-        )}
-        <ContextMenu />
-      </div>
-    </ReactFlowProvider>
+    <div ref={reactFlowWrapperRef} className={styles.container}>
+      {!hasOntology ? (
+        <div className={styles.noOntologyMessage}>Load ontology to view graph</div>
+      ) : (
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          onNodeClick={onNodeClick}
+          onEdgeClick={onEdgeClick}
+          onNodeContextMenu={(event, node) => handleContextMenu('node', node.id)(event)}
+          onEdgeContextMenu={(event, edge) => handleContextMenu('edge', edge.id)(event)}
+          onPaneContextMenu={(event) => handleContextMenu('pane', null)(event)}
+          onPaneClick={onPaneClick}
+          onMoveStart={onMoveStart}
+          onConnect={onConnect}
+          onNodeDragStop={onNodeDragStop}
+          onNodeDragStart={onNodeDragStart}
+          onConnectStart={onConnectStart}
+          onConnectEnd={onConnectEndHandler}
+          fitView
+        >
+          <MiniMap className={styles.miniMap} />
+          <Controls className={styles.controls} />
+          <Background />
+        </ReactFlow>
+      )}
+      <ContextMenu />
+    </div>
   );
 };

@@ -7,6 +7,7 @@ import { SchemaEditor } from './components/SchemaEditor/SchemaEditor';
 import { Button } from './components/Button/Button';
 import { useOntologyStore } from './state/useOntologyStore';
 import styles from './App.module.scss';
+import { ReactFlowProvider } from 'reactflow';
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'graph' | 'schema'>('graph');
@@ -46,7 +47,9 @@ export const App: React.FC = () => {
         <Toolbar />
         {activeTab === 'graph' && (
           <div className={styles.graphWrapper}>
-            <GraphView />
+            <ReactFlowProvider>
+              <GraphView />
+            </ReactFlowProvider>
             <div className={styles.form}>
               <NodeForm />
               <EdgeForm />
