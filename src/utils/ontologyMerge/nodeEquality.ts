@@ -15,7 +15,10 @@ const stableStringify = (obj: Record<string, any>) =>
   );
 
 export const getNodeSignature = (node: Node, schema: Schema): string => {
-  const normalizedProps = normalizeProperties(node.properties, schema.nodeFields);
+  const normalizedProps = normalizeProperties(
+    node.properties,
+    schema.edgeTypes[node.typeId].fields
+  );
 
-  return `${node.type}::${stableStringify(normalizedProps)}`;
+  return `${node.typeId}::${stableStringify(normalizedProps)}`;
 };

@@ -21,6 +21,7 @@ import type { Schema, Node } from '../../models/ontology';
 import { createEmptyNode } from '../../models/createNode';
 import { useReactFlow } from 'reactflow';
 import { generateId } from '../../utils/id';
+import { getDefaultNodeType, getDefaultEdgeType } from '../../utils/defaultTypes';
 
 export const GraphView: React.FC = () => {
   const screenToFlowPosition = useReactFlow().screenToFlowPosition;
@@ -46,10 +47,14 @@ export const GraphView: React.FC = () => {
   const hasOntology = ontology !== null;
 
   const getNodeLabel = (node: Node, schema: Schema): string => {
-    if (typeof node.properties?.name === 'string' && node.properties.name.trim()) {
-      return node.properties.name;
+    const schemaNodeType = schema.nodeTypes[node.typeId];
+    const nameField = Object.values(schemaNodeType.fields).find((f) => f.name === 'name');
+    if (nameField?.type === 'string' && node.properties[nameField.id]?.trim()) {
+      return node.properties[nameField.id];
     }
-    const firstStringField = schema.nodeFields.find((f) => f.type === 'string');
+    const firstStringField = Object.values(schema.nodeTypes[node.typeId].fields).find(
+      (f) => f.type === 'string'
+    );
     if (firstStringField) {
       const value = node.properties?.[firstStringField.name];
       if (typeof value === 'string' && value.trim()) {
@@ -88,12 +93,12 @@ export const GraphView: React.FC = () => {
         id: e.id,
         source: e.source,
         target: e.target,
-        ...edgeBehavior[e.type],
-        className: getEdgeClassName(e.type, {
+        ...edgeBehavior[ontology.schema.edgeTypes[e.typeId].name],
+        className: getEdgeClassName(ontology.schema.edgeTypes[e.typeId].name, {
           selected: e.id === selectedEdgeId,
           highlighted: highlightedEdges.has(e.id),
         }),
-        label: e.type,
+        label: ontology.schema.edgeTypes[e.typeId].name,
       }))
     );
   }, [ontology, selectedNodeId, selectedEdgeId]);
@@ -153,8 +158,7 @@ export const GraphView: React.FC = () => {
     if (!ontology) return;
     connectingNodeId.current = null;
 
-    const edgeTypes = Object.keys(ontology.schema.edgeTypes);
-    const defaultType = edgeTypes[0] || 'related_to';
+    const defaultEdgeTypeId = getDefaultEdgeType(ontology.schema);
 
     const exists = ontology.edges.some(
       (e) => e.source === params.source && e.target === params.target
@@ -170,8 +174,8 @@ export const GraphView: React.FC = () => {
       id: id,
       source: params.source,
       target: params.target,
-      type: defaultType,
-      properties: createDefaultValues(ontology.schema.edgeTypes[defaultType]?.fields || []),
+      typeId: defaultEdgeTypeId,
+      properties: createDefaultValues(ontology.schema.edgeTypes[defaultEdgeTypeId]?.fields || []),
     });
     selectEdge(id);
   };
@@ -212,6 +216,9 @@ export const GraphView: React.FC = () => {
   const onConnectEndHandler = (event: MouseEvent | TouchEvent) => {
     if (!connectingNodeId.current || !ontology) return;
 
+    const defaultNodeTypeId = getDefaultNodeType(ontology.schema);
+    const defaultEdgeTypeId = getDefaultEdgeType(ontology.schema);
+
     let x: number;
     let y: number;
 
@@ -231,18 +238,20 @@ export const GraphView: React.FC = () => {
     const positionInFlow = screenToFlowPosition({ x, y });
 
     const id = generateId('node');
-    const newNode = createEmptyNode(id, ontology.schema.nodeFields, positionInFlow);
+    const newNode = createEmptyNode(
+      id,
+      defaultNodeTypeId,
+      ontology.schema.nodeTypes[defaultNodeTypeId].fields,
+      positionInFlow
+    );
     addNode(newNode);
-
-    const edgeTypes = Object.keys(ontology.schema.edgeTypes);
-    const defaultType = edgeTypes[0] || 'related_to';
 
     addEdgeToStore({
       id: `e-${connectingNodeId.current}-${newNode.id}-${Date.now()}`,
       source: connectingNodeId.current,
       target: newNode.id,
-      type: defaultType,
-      properties: createDefaultValues(ontology.schema.edgeTypes[defaultType]?.fields || []),
+      typeId: defaultEdgeTypeId,
+      properties: createDefaultValues(ontology.schema.edgeTypes[defaultEdgeTypeId]?.fields || []),
     });
 
     // selectNode(newNode.id);

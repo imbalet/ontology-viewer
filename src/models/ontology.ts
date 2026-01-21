@@ -1,13 +1,16 @@
 export type NodeId = string;
 export type EdgeId = string;
 
+export type NodeTypeId = string;
+export type EdgeTypeId = string;
+
 export type FieldType = 'string' | 'number' | 'boolean' | 'enum';
 
 export interface Node {
   id: NodeId;
-  type: 'Skill';
+  typeId: NodeTypeId;
   properties: {
-    [key: string]: any;
+    [id: string]: any;
   };
   position: { x: number; y: number };
 }
@@ -16,9 +19,9 @@ export interface Edge {
   id: EdgeId;
   source: NodeId;
   target: NodeId;
-  type: string;
+  typeId: EdgeTypeId;
   properties?: {
-    [key: string]: any;
+    [id: string]: any;
   };
 }
 
@@ -30,16 +33,45 @@ export interface SchemaField {
   required?: boolean;
 }
 
-export interface Schema {
-  nodeFields: SchemaField[];
-  edgeTypes: {
-    [type: string]: {
-      id: string;
-      directed: boolean;
-      fields?: SchemaField[];
-    };
+export interface TypeConfig {
+  name: string;
+  fields: {
+    [fieldId: string]: SchemaField;
   };
 }
+
+export interface EdgeTypeConfig extends TypeConfig {
+  directed: boolean;
+}
+
+export interface Schema {
+  nodeTypes: {
+    [nodeTypeId: string]: TypeConfig;
+  };
+  edgeTypes: {
+    [edgeTypeId: string]: EdgeTypeConfig;
+  };
+}
+
+// export interface Schema {
+//   nodeTypes: {
+//     [nodeTypeId: string]: {
+//       name: string;
+//       fields: {
+//         [fieldId: string]: SchemaField;
+//       };
+//     };
+//   };
+//   edgeTypes: {
+//     [edgeTypeId: string]: {
+//       name: string;
+//       directed: boolean;
+//       fields: {
+//         [fieldId: string]: SchemaField;
+//       };
+//     };
+//   };
+// }
 
 export interface Ontology {
   schema: Schema;

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useOntologyStore } from '../../state/useOntologyStore';
-import { NodeFieldsEditor } from './NodeFieldsEditor';
+import { NodeTypesEditor } from './NodeTypesEditor';
 import { EdgeTypesEditor } from './EdgeTypesEditor';
 import styles from './SchemaEditor.module.scss';
 
@@ -11,7 +11,7 @@ export const SchemaEditor: React.FC = () => {
 
   return (
     <div className={styles.container}>
-      <NodeFieldsEditor schema={schema} />
+      <NodeTypesEditor schema={schema} />
       <EdgeTypesEditor schema={schema} />
     </div>
   );

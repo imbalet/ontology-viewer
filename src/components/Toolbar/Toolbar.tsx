@@ -21,7 +21,7 @@ export const Toolbar: React.FC = () => {
     loadOntology({
       nodes: [],
       edges: [],
-      schema: { nodeFields: [], edgeTypes: {} },
+      schema: { nodeTypes: {}, edgeTypes: {} },
     });
   }, [loadOntology]);
 

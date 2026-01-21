@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useOntologyStore } from '../../state/useOntologyStore';
 import type { SchemaField, Ontology } from '../../models/ontology';
 import { TextInput } from '../TextInput/TextInput';
 import { Button } from '../Button/Button';
-import { emptyField, updateAt, removeAt } from './schemaUtils';
-import type { EdgeTypeConfig } from './types';
+import { emptyField } from './schemaUtils';
 import { SchemaFieldEditor } from './SchemaFieldEditor';
 import styles from './SchemaEditor.module.scss';
 
@@ -14,167 +13,120 @@ interface Props {
 
 export const EdgeTypesEditor: React.FC<Props> = ({ schema }) => {
   const updateSchema = useOntologyStore((s) => s.updateSchema);
-  const { edgeTypes } = schema;
+  const { edgeTypes: edgeTypes } = schema;
 
   const [editingTypes, setEditingTypes] = useState<Record<string, string>>(() =>
-    Object.fromEntries(Object.entries(edgeTypes).map(([type, cfg]) => [cfg.id, type]))
+    Object.fromEntries(Object.entries(edgeTypes).map(([id, cfg]) => [id, cfg.name]))
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     setEditingTypes(
-      Object.fromEntries(Object.entries(edgeTypes).map(([type, cfg]) => [cfg.id, type]))
+      Object.fromEntries(Object.entries(edgeTypes).map(([id, cfg]) => [id, cfg.name]))
     );
   }, [edgeTypes]);
 
-  const addEdgeType = () =>
+  const addEdgeType = () => {
     updateSchema((s) => {
       const id = `edge_${Date.now()}`;
       return {
         ...s,
         edgeTypes: {
           ...s.edgeTypes,
-          [id]: { id, directed: true, fields: [] },
+          [id]: { name: 'New Edge', directed: true, fields: {} },
         },
       };
     });
+  };
 
-  const updateEdgeType = (type: string, patch: Partial<EdgeTypeConfig>) =>
+  const updateEdgeType = (
+    id: string,
+    patch: Partial<{ name: string; directed: boolean; fields: Record<string, SchemaField> }>
+  ) => {
     updateSchema((s) => ({
       ...s,
       edgeTypes: {
         ...s.edgeTypes,
-        [type]: { ...s.edgeTypes[type], ...patch },
+        [id]: { ...s.edgeTypes[id], ...patch },
       },
     }));
+  };
 
-  const removeEdgeType = (type: string) =>
+  const removeEdgeType = (id: string) =>
     updateSchema((s) => {
-      const { [type]: _, ...rest } = s.edgeTypes;
+      const { [id]: _, ...rest } = s.edgeTypes;
       return { ...s, edgeTypes: rest };
     });
 
-  const renameEdgeType = (oldType: string, newType: string) => {
-    const { updateSchema, ontology, updateEdgesWithHistory } = useOntologyStore.getState();
-
-    if (!ontology || !newType || oldType === newType) return;
-
-    updateSchema((schema) => {
-      if (schema.edgeTypes[newType]) return schema;
-
-      const { [oldType]: cfg, ...rest } = schema.edgeTypes;
-
-      return {
-        ...schema,
-        edgeTypes: {
-          ...rest,
-          [newType]: cfg,
-        },
-      };
-    });
-
-    const newEdges = ontology.edges.map((edge) => {
-      if (edge.type !== oldType) return edge;
-      return { ...edge, type: newType };
-    });
-
-    // TODO: change saving in history
-    updateEdgesWithHistory(newEdges);
+  const renameEdgeType = (id: string, newName: string) => {
+    if (!newName || edgeTypes[id].name === newName) return;
+    updateEdgeType(id, { name: newName });
   };
 
-  const addEdgeField = (type: string) =>
-    updateEdgeType(type, {
-      fields: [...(edgeTypes[type].fields ?? []), emptyField()],
+  const addEdgeField = (edgeTypeId: string) => {
+    const id = `field_${Date.now()}`;
+    updateEdgeType(edgeTypeId, {
+      fields: { ...edgeTypes[edgeTypeId].fields, [id]: emptyField(id) },
     });
+  };
 
-  const updateEdgeField = (type: string, index: number, field: SchemaField) =>
-    updateEdgeType(type, {
-      fields: updateAt(edgeTypes[type].fields ?? [], index, field),
+  const updateEdgeField = (edgeTypeId: string, fieldId: string, field: SchemaField) => {
+    updateEdgeType(edgeTypeId, {
+      fields: { ...edgeTypes[edgeTypeId].fields, [fieldId]: field },
     });
+  };
 
-  const removeEdgeField = (type: string, index: number) =>
-    updateEdgeType(type, {
-      fields: removeAt(edgeTypes[type].fields ?? [], index),
-    });
+  const removeEdgeField = (edgeTypeId: string, fieldId: string) => {
+    const { [fieldId]: _, ...rest } = edgeTypes[edgeTypeId].fields;
+    updateEdgeType(edgeTypeId, { fields: rest });
+  };
 
-  const renameEdgeField = (edgeType: string, oldName: string, newName: string) => {
-    const { updateSchema, ontology, updateEdgesWithHistory } = useOntologyStore.getState();
-
-    if (!ontology || oldName === newName || !newName) return;
-
-    updateSchema((schema) => ({
-      ...schema,
-      edgeTypes: {
-        ...schema.edgeTypes,
-        [edgeType]: {
-          ...schema.edgeTypes[edgeType],
-          fields: (schema.edgeTypes[edgeType].fields ?? []).map((f) =>
-            f.name === oldName ? { ...f, name: newName } : f
-          ),
-        },
-      },
-    }));
-
-    const newEdges = ontology.edges.map((edge) => {
-      if (edge.type !== edgeType) return edge;
-      if (!(oldName in (edge.properties ?? {}))) return edge;
-
-      const value = edge.properties![oldName];
-      const newProps = { ...edge.properties, [newName]: value };
-      delete newProps[oldName];
-
-      return { ...edge, properties: newProps };
-    });
-
-    updateEdgesWithHistory(newEdges);
+  const renameEdgeField = (edgeTypeId: string, fieldId: string, newName: string) => {
+    const field = edgeTypes[edgeTypeId].fields[fieldId];
+    if (!field || field.name === newName) return;
+    updateEdgeField(edgeTypeId, fieldId, { ...field, name: newName });
   };
 
   return (
     <div className={styles.column}>
       <h3>Edge Types</h3>
-
       {Object.entries(edgeTypes)
         .sort(([aId], [bId]) => aId.localeCompare(bId))
-        .map(([type, cfg]) => {
-          const editingType = editingTypes[cfg.id] ?? type;
-
+        .map(([id, cfg]) => {
+          const editingName = editingTypes[id] ?? cfg.name;
           return (
-            <div key={cfg.id} className={styles.field}>
-              <div className={styles.edgeGeneral}>
+            <div key={id} className={styles.field}>
+              <div className={styles.general}>
                 <TextInput
-                  value={editingType}
-                  onChange={(e) =>
-                    setEditingTypes((prev) => ({ ...prev, [cfg.id]: e.target.value }))
-                  }
-                  onBlur={() => {
-                    renameEdgeType(type, editingTypes[cfg.id]);
-                  }}
+                  value={editingName}
+                  onChange={(e) => setEditingTypes((prev) => ({ ...prev, [id]: e.target.value }))}
+                  onBlur={() => renameEdgeType(id, editingTypes[id])}
                 />
 
                 <label>
                   <input
                     type="checkbox"
                     checked={cfg.directed}
-                    onChange={(e) => updateEdgeType(type, { directed: e.target.checked })}
+                    onChange={(e) => updateEdgeType(id, { directed: e.target.checked })}
                   />
                   directed
                 </label>
 
-                <Button onClick={() => removeEdgeType(type)}>🗑</Button>
+                <Button onClick={() => removeEdgeType(id)}>🗑</Button>
               </div>
 
-              <div className={styles.edgeProperties}>
-                {(cfg.fields ?? []).map((f, i) => (
+              <div className={styles.properties}>
+                {Object.entries(cfg.fields).map(([fieldId, field]) => (
                   <SchemaFieldEditor
-                    key={i}
-                    field={f}
-                    onChange={(field) => updateEdgeField(type, i, field)}
-                    onRename={(oldName, newName) => renameEdgeField(type, oldName, newName)}
-                    onRemove={() => removeEdgeField(type, i)}
+                    key={fieldId}
+                    field={field}
+                    onChange={(f) => updateEdgeField(id, fieldId, f)}
+                    onRename={(_, newName) => renameEdgeField(id, fieldId, newName)}
+                    onRemove={() => removeEdgeField(id, fieldId)}
                   />
                 ))}
               </div>
 
-              <Button onClick={() => addEdgeField(type)}>+ Add field</Button>
+              <Button onClick={() => addEdgeField(id)}>+ Add field</Button>
             </div>
           );
         })}

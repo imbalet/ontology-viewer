@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import type { Ontology, Node, Edge, NodeId, EdgeId } from '../models/ontology';
 import { applyAutoLayout } from '../utils/layout';
 import { mergeOntology as mergeFn } from '../utils/ontologyMerge/mergeOntology';
+import { createDefaultValues } from '../models/defaultValues';
 
 const MAX_HISTORY = 70;
 const HISTORY_DEBOUNCE_MS = 400;
@@ -115,24 +116,33 @@ export const useOntologyStore = create<OntologyState>((set) => ({
     set((state) => {
       if (!state.ontology) return state;
 
+      const typeSchema = state.ontology.schema.nodeTypes[node.typeId];
+      if (!typeSchema) throw new Error(`Unknown node type id: ${node.typeId}`);
+
       const newNode: Node = {
         ...node,
         position: node.position ?? { x: 0, y: 0 },
+        properties: createDefaultValues(typeSchema.fields),
       };
 
       const newOntology: Ontology = {
         ...state.ontology,
         nodes: [...state.ontology.nodes, newNode],
       };
+
       return { ...state, ...pushHistory(state, newOntology) };
     }),
 
   updateNode: (node) =>
     set((state) => {
       if (!state.ontology) return state;
+
+      const typeSchema = state.ontology.schema.nodeTypes[node.typeId];
+      if (!typeSchema) throw new Error(`Unknown node type id: ${node.typeId}`);
+
       const newOntology: Ontology = {
         ...state.ontology,
-        nodes: state.ontology.nodes.map((n) => (n.id === node.id ? node : n)),
+        nodes: state.ontology.nodes.map((n) => (n.id === node.id ? { ...n, ...node } : n)),
       };
       return { ...state, ...pushHistory(state, newOntology) };
     }),

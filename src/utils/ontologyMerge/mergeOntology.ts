@@ -30,7 +30,7 @@ export const mergeOntology = (base: Ontology, incoming: Ontology): Ontology => {
     importedNodes.push({
       ...node,
       id: newId,
-      properties: normalizeProperties(node.properties, base.schema.nodeFields),
+      properties: normalizeProperties(node.properties, base.schema.nodeTypes[node.typeId].fields),
       position: {
         x: node.position.x + 40,
         y: node.position.y + 40,
@@ -40,7 +40,7 @@ export const mergeOntology = (base: Ontology, incoming: Ontology): Ontology => {
 
   const importedEdges: Edge[] = incoming.edges
     .map((edge) => {
-      const mappedType = edgeTypeMap.get(edge.type);
+      const mappedType = edgeTypeMap.get(edge.typeId);
       if (!mappedType) return null;
 
       const sourceId = nodeIdMap.get(edge.source);

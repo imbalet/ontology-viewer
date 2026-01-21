@@ -5,6 +5,7 @@ import { validateField } from '../../models/validation';
 import { Select } from '../Select/Select';
 import { TextInput } from '../TextInput/TextInput';
 import styles from './NodeForm.module.scss';
+import { createDefaultValues } from '../../models/defaultValues';
 
 export const NodeForm: React.FC = () => {
   const selectedNodeId = useOntologyStore((s) => s.selectedNodeId);
@@ -12,14 +13,14 @@ export const NodeForm: React.FC = () => {
   const updateNode = useOntologyStore((s) => s.updateNode);
 
   const node = ontology?.nodes.find((n) => n.id === selectedNodeId);
-  const fields = ontology?.schema.nodeFields ?? [];
+  const fields = node?.typeId ? (ontology?.schema.nodeTypes[node.typeId]?.fields ?? {}) : {};
 
   const errors = useMemo(() => {
     if (!node) return {};
 
     const result: Record<string, string | null> = {};
-    for (const field of fields) {
-      result[field.name] = validateField(field, node.properties?.[field.name]);
+    for (const field of Object.values(fields)) {
+      result[field.id] = validateField(field, node.properties?.[field.id]);
     }
     return result;
   }, [fields, node]);
@@ -30,79 +31,106 @@ export const NodeForm: React.FC = () => {
     return null;
   }
 
-  const handleChange = (field: SchemaField, value: any) => {
+  const nodeTypes = Object.keys(ontology.schema.nodeTypes);
+
+  const handleTypeChange = (newTypeId: string) => {
+    console.log('Changing node type to', newTypeId);
+    updateNode({
+      ...node,
+      typeId: newTypeId,
+      properties: createDefaultValues(ontology.schema.nodeTypes[newTypeId].fields),
+    });
+  };
+
+  const handleFieldChange = (field: SchemaField, value: any) => {
     const updatedNode: Node = {
       ...node,
       properties: {
         ...node.properties,
-        [field.name]: value,
+        [field.id]: value,
       },
     };
     updateNode(updatedNode);
   };
 
+  const renderField = (field: SchemaField) => {
+    const value = node.properties?.[field.id] ?? '';
+    const error = errors[field.id];
+
+    return (
+      <div key={field.id} className={styles.fieldWrapper}>
+        <label className={styles.label}>
+          {field.name}
+          {field.required && ' *'}
+        </label>
+
+        {field.type === 'string' && (
+          <TextInput
+            variant={field.required ? 'required' : 'default'}
+            value={value}
+            onChange={(e) => handleFieldChange(field, e.target.value)}
+          />
+        )}
+
+        {field.type === 'number' && (
+          <TextInput
+            variant={field.required ? 'required' : 'default'}
+            type="number"
+            value={value}
+            onChange={(e) => {
+              const val = e.target.value;
+              handleFieldChange(field, val === '' ? '' : Number(val));
+            }}
+          />
+        )}
+
+        {field.type === 'boolean' && (
+          <input
+            type="checkbox"
+            checked={Boolean(value)}
+            onChange={(e) => handleFieldChange(field, e.target.checked)}
+          />
+        )}
+
+        {field.type === 'enum' && (
+          <Select
+            variant={field.required ? 'required' : 'default'}
+            value={value}
+            onChange={(e) => handleFieldChange(field, e.target.value)}
+          >
+            <option value="">—</option>
+            {field.options?.map((opt) => (
+              <option key={opt} value={opt}>
+                {opt}
+              </option>
+            ))}
+          </Select>
+        )}
+
+        {error && <div className={styles.error}>{error}</div>}
+      </div>
+    );
+  };
+
   return (
     <div className={styles.container}>
-      <h3 className={styles.header}>Edit Node: {node.properties.name || node.id}</h3>
+      <h3 className={styles.heading}>Edit Node</h3>
 
-      {fields.map((field) => {
-        const value = node.properties?.[field.name] ?? '';
-        const error = errors[field.name];
+      <div className={styles.typeSelect}>
+        <label className={styles.label}>Type</label>
+        <Select value={node.typeId} onChange={(e) => handleTypeChange(e.target.value)}>
+          {nodeTypes.map((t) => (
+            <option key={t} value={t}>
+              {ontology.schema.nodeTypes[t].name}
+            </option>
+          ))}
+        </Select>
+      </div>
 
-        return (
-          <div key={field.name} className={styles.field}>
-            <label className={styles.label}>
-              {field.name}
-              {field.required && ' *'}
-            </label>
+      <h4>Properties</h4>
+      {Object.values(fields).map(renderField)}
 
-            {field.type === 'string' && (
-              <TextInput
-                type="text"
-                variant={field.required ? 'required' : 'default'}
-                value={value}
-                onChange={(e) => handleChange(field, e.target.value)}
-              />
-            )}
-
-            {field.type === 'number' && (
-              <TextInput
-                type="number"
-                variant={field.required ? 'required' : 'default'}
-                value={value}
-                onChange={(e) => handleChange(field, Number(e.target.value))}
-              />
-            )}
-
-            {field.type === 'boolean' && (
-              <input
-                type="checkbox"
-                checked={Boolean(value)}
-                onChange={(e) => handleChange(field, e.target.checked)}
-              />
-            )}
-
-            {field.type === 'enum' && (
-              <Select
-                variant={field.required ? 'required' : 'default'}
-                value={value}
-                onChange={(e) => handleChange(field, e.target.value)}
-              >
-                <option value="">—</option>
-                {field.options?.map((opt) => (
-                  <option key={opt} value={opt}>
-                    {opt}
-                  </option>
-                ))}
-              </Select>
-            )}
-
-            {error && <div className={styles.errorText}>{error}</div>}
-          </div>
-        );
-      })}
-
-      {hasErrors && <div className={styles.validationError}>Please fix validation errors</div>}
+      {hasErrors && <div className={styles.errorMessage}>Please fix validation errors</div>}
     </div>
   );
 };

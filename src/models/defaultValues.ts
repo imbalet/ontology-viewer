@@ -1,30 +1,30 @@
 import { type SchemaField } from './ontology';
 
-export function createDefaultValues(fields: SchemaField[]): Record<string, any> {
+export function createDefaultValues(fields: Record<string, SchemaField>): Record<string, any> {
   const defaults: Record<string, any> = {};
-  for (const field of fields) {
+
+  for (const fieldId in fields) {
+    const field = fields[fieldId];
+
     if (field.required) {
       switch (field.type) {
         case 'string':
-          defaults[field.name] = 'empty';
+          defaults[field.id] = 'empty';
           break;
         case 'number':
-          defaults[field.name] = 0;
+          defaults[field.id] = 0;
           break;
         case 'boolean':
-          defaults[field.name] = false;
+          defaults[field.id] = false;
           break;
         case 'enum':
-          defaults[field.name] = field.options?.[0] ?? '';
+          defaults[field.id] = field.options?.[0] ?? '';
           break;
       }
     } else {
-      if (field.type === 'boolean') {
-        defaults[field.name] = false;
-      } else {
-        defaults[field.name] = undefined;
-      }
+      defaults[field.id] = field.type === 'boolean' ? false : undefined;
     }
   }
+
   return defaults;
 }

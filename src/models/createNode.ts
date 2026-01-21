@@ -3,12 +3,13 @@ import { createDefaultValues } from './defaultValues';
 
 export function createEmptyNode(
   id: string,
-  fields: SchemaField[],
+  typeId: string,
+  fields: Record<string, SchemaField>,
   position: { x: number; y: number }
 ): Node {
   return {
     id,
-    type: 'Skill',
+    typeId,
     position,
     properties: createDefaultValues(fields),
   };

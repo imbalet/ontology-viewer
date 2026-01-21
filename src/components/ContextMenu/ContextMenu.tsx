@@ -5,6 +5,7 @@ import { createEmptyNode } from '../../models/createNode';
 import { generateId } from '../../utils/id';
 import { Button } from '../Button/Button';
 import styles from './ContextMenu.module.scss';
+import { getDefaultNodeType } from '../../utils/defaultTypes';
 
 export const ContextMenu: React.FC = () => {
   const contextMenu = useOntologyStore((s) => s.contextMenu);
@@ -42,8 +43,9 @@ export const ContextMenu: React.FC = () => {
 
     const graphPos = project(position);
     const id = generateId('node');
+    const typeId = getDefaultNodeType(ontology.schema);
 
-    const node = createEmptyNode(id, ontology.schema.nodeFields, graphPos);
+    const node = createEmptyNode(id, typeId, ontology.schema.nodeTypes[typeId].fields, graphPos);
 
     addNode(node);
     selectNode(id);

@@ -5,6 +5,7 @@ import { validateField } from '../../models/validation';
 import { Select } from '../Select/Select';
 import { TextInput } from '../TextInput/TextInput';
 import styles from './EdgeForm.module.scss';
+import { createDefaultValues } from '../../models/defaultValues';
 
 export const EdgeForm: React.FC = () => {
   const ontology = useOntologyStore((s) => s.ontology);
@@ -14,16 +15,16 @@ export const EdgeForm: React.FC = () => {
   const edge = ontology?.edges.find((e) => e.id === selectedEdgeId);
 
   const fields = useMemo(() => {
-    if (!ontology || !edge) return [];
-    return ontology.schema.edgeTypes[edge.type]?.fields ?? [];
+    if (!ontology || !edge) return {};
+    return ontology.schema.edgeTypes[edge.typeId]?.fields ?? {};
   }, [ontology, edge]);
 
   const errors = useMemo(() => {
     if (!edge) return {};
 
     const result: Record<string, string | null> = {};
-    for (const field of fields) {
-      result[field.name] = validateField(field, edge.properties?.[field.name]);
+    for (const field of Object.values(fields)) {
+      result[field.id] = validateField(field, edge.properties?.[field.id]);
     }
     return result;
   }, [fields, edge]);
@@ -36,11 +37,11 @@ export const EdgeForm: React.FC = () => {
 
   const edgeTypes = Object.keys(ontology.schema.edgeTypes);
 
-  const handleTypeChange = (newType: string) => {
+  const handleTypeChange = (newTypeId: string) => {
     updateEdge({
       ...edge,
-      type: newType,
-      properties: {},
+      typeId: newTypeId,
+      properties: createDefaultValues(ontology.schema.edgeTypes[newTypeId].fields),
     });
   };
 
@@ -49,17 +50,17 @@ export const EdgeForm: React.FC = () => {
       ...edge,
       properties: {
         ...edge.properties,
-        [field.name]: value,
+        [field.id]: value,
       },
     });
   };
 
   const renderField = (field: SchemaField) => {
-    const value = edge.properties?.[field.name] ?? '';
-    const error = errors[field.name];
+    const value = edge.properties?.[field.id] ?? '';
+    const error = errors[field.id];
 
     return (
-      <div key={field.name} className={styles.fieldWrapper}>
+      <div key={field.id} className={styles.fieldWrapper}>
         <label className={styles.label}>
           {field.name}
           {field.required && ' *'}
@@ -78,7 +79,10 @@ export const EdgeForm: React.FC = () => {
             variant={field.required ? 'required' : 'default'}
             type="number"
             value={value}
-            onChange={(e) => handleFieldChange(field, Number(e.target.value))}
+            onChange={(e) => {
+              const val = e.target.value;
+              handleFieldChange(field, val === '' ? '' : Number(val));
+            }}
           />
         )}
 
@@ -116,17 +120,17 @@ export const EdgeForm: React.FC = () => {
 
       <div className={styles.typeSelect}>
         <label className={styles.label}>Type</label>
-        <Select value={edge.type} onChange={(e) => handleTypeChange(e.target.value)}>
+        <Select value={edge.typeId} onChange={(e) => handleTypeChange(e.target.value)}>
           {edgeTypes.map((t) => (
             <option key={t} value={t}>
-              {t}
+              {ontology.schema.edgeTypes[t].name}
             </option>
           ))}
         </Select>
       </div>
 
       <h4>Properties</h4>
-      {fields.map(renderField)}
+      {Object.values(fields).map(renderField)}
 
       {hasErrors && <div className={styles.errorMessage}>Please fix validation errors</div>}
 

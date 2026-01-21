@@ -3,16 +3,16 @@ import { createDefaultValues } from '../../models/defaultValues';
 
 export const normalizeProperties = (
   incoming: Record<string, any>,
-  schemaFields: SchemaField[]
+  schemaFields: Record<string, SchemaField>
 ): Record<string, any> => {
   const result: Record<string, any> = {};
   const defaults = createDefaultValues(schemaFields);
 
-  for (const field of schemaFields) {
-    if (incoming[field.name] !== undefined) {
-      result[field.name] = incoming[field.name];
-    } else if (defaults[field.name] !== undefined) {
-      result[field.name] = defaults[field.name];
+  for (const field of Object.values(schemaFields)) {
+    if (incoming[field.id] !== undefined) {
+      result[field.id] = incoming[field.id];
+    } else if (defaults[field.id] !== undefined) {
+      result[field.id] = defaults[field.id];
     }
   }
 
