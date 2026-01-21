@@ -118,17 +118,16 @@ npm run build
 
 Схема определяет:
 
-- Какие **поля** есть у узлов (например: "name", "category", "description")
-- Какие **типы связей** допустимы (например: "includes", "requires", "related_to")
-- Какие **поля** есть у каждого типа связи
-- Свойства полей
+- Какие **типы узлов** допустимы (например: "Skill", "Topic", "Resource") и какие **поля** есть у каждого типа узла
+- Какие **типы связей** допустимы (например: "includes", "requires", "related_to") и какие **поля** есть у каждого типа связи
+- Свойства полей (тип, обязательность, значения по умолчанию)
 
 #### Редактирование схемы
 
 Нажмите на вкладку **"Schema Editor"** для редактирования структуры:
 
-- **Node Fields** — добавление/удаление полей узлов
-- **Edge Types** — добавление/удаление типов связей и их свойств
+- **Node Types** — добавление/удаление типов узлов и их полей
+- **Edge Types** — добавление/удаление типов связей и их полей
 
 При редактировании схемы новые поля автоматически появляются в формах редактирования узлов и связей.
 
@@ -147,47 +146,58 @@ npm run build
 ```json
 {
   "schema": {
-    "nodeFields": [
-      {
-        "name": "name",
-        "type": "string",
-        "required": true
-      },
-      {
-        "name": "category",
-        "type": "enum",
-        "options": ["programming", "math", "tool"],
-        "required": false
-      },
-      {
-        "name": "description",
-        "type": "string",
-        "required": false
+    "nodeTypes": {
+      "nt_skill": {
+        "name": "Skill",
+        "fields": {
+          "f_name": {
+            "id": "f_name",
+            "name": "name",
+            "type": "string",
+            "required": true
+          },
+          "f_category": {
+            "id": "f_category",
+            "name": "category",
+            "type": "enum",
+            "options": ["programming", "math", "tool"],
+            "required": false
+          },
+          "f_description": {
+            "id": "f_description",
+            "name": "description",
+            "type": "string",
+            "required": false
+          }
+        }
       }
-    ],
+    },
     "edgeTypes": {
-      "includes": {
+      "et_includes": {
+        "name": "includes",
         "directed": true,
-        "fields": []
+        "fields": {}
       },
-      "requires": {
+      "et_requires": {
+        "name": "requires",
         "directed": true,
-        "fields": []
+        "fields": {}
       },
-      "related_to": {
+      "et_related_to": {
+        "name": "related_to",
         "directed": false,
-        "fields": []
+        "fields": {}
       }
     }
   },
   "nodes": [
     {
       "id": "1",
-      "type": "Skill",
+      "typeId": "nt_skill",
       "properties": {
-        "name": "Python",
-        "category": "programming",
-        "description": "Язык программирования"
+        "f_name": "Python",
+        "f_category": "programming",
+        "f_description": "Язык программирования"
       },
       "position": {
         "x": 75,
@@ -196,10 +206,10 @@ npm run build
     },
     {
       "id": "2",
-      "type": "Skill",
+      "typeId": "nt_skill",
       "properties": {
-        "name": "Списки и массивы",
-        "category": "programming"
+        "f_name": "Списки и массивы",
+        "f_category": "programming"
       },
       "position": {
         "x": 75,
@@ -212,7 +222,7 @@ npm run build
       "id": "e1",
       "source": "1",
       "target": "2",
-      "type": "includes",
+      "typeId": "et_includes",
       "properties": {}
     }
   ]
@@ -224,7 +234,7 @@ npm run build
 ```json
 {
   "schema": {
-    "nodeFields": [],
+    "nodeTypes": {},
     "edgeTypes": {}
   },
   "nodes": [],
@@ -234,41 +244,67 @@ npm run build
 
 #### Schema
 
+**nodeTypes** — объект с описанием типов узлов:
+
 ```json
 {
-  "schema": {
-    "nodeFields": [
-      {
-        "name": "name",
-        "type": "string",
-        "required": true
-      },
-      {
-        "name": "category",
-        "type": "enum",
-        "options": ["programming", "math", "tool"],
-        "required": false
-      }
-    ],
-    "edgeTypes": {
-      "includes": {
-        "directed": true,
-        "fields": []
+  "nodeTypes": {
+    "nt_skill": {
+      "name": "Skill",
+      "fields": {
+        "f_name": {
+          "id": "f_name",
+          "name": "name",
+          "type": "string",
+          "required": true
+        },
+        "f_category": {
+          "id": "f_category",
+          "name": "category",
+          "type": "enum",
+          "options": ["programming", "math", "tool"],
+          "required": false
+        }
       }
     }
   }
 }
 ```
 
-- **nodeFields** — массив полей узлов
-  - `name` — имя поля (используется в формах)
+- Каждый тип узла имеет уникальный ID (например: `nt_skill`)
+- `name` — отображаемое имя типа узла
+- `fields` — объект полей этого типа узла:
+  - `id` — уникальный идентификатор поля
+  - `name` — отображаемое имя поля
   - `type` — тип: `string`, `number`, `boolean`, `enum`
   - `required` — обязательно ли поле
   - `options` — для `enum`: список допустимых значений
 
-- **edgeTypes** — объект с описанием типов связей
-  - `directed` — если `true`, связь направленная (стрелка в одну сторону)
-  - `fields` — поля связи (аналогично nodeFields)
+**edgeTypes** — объект с описанием типов связей:
+
+```json
+{
+  "edgeTypes": {
+    "et_includes": {
+      "name": "includes",
+      "directed": true,
+      "fields": {
+        "f_strength": {
+          "id": "f_strength",
+          "name": "strength",
+          "type": "number",
+          "required": false
+        }
+      }
+    }
+  }
+}
+```
+
+- Каждый тип связи имеет уникальный ID (например: `et_includes`)
+- `name` — отображаемое имя типа связи
+- `directed` — если `true`, связь направленная (стрелка в одну сторону)
+- `fields` — объект полей этого типа связи (структура как у nodeTypes)
 
 #### Nodes
 
@@ -277,11 +313,11 @@ npm run build
   "nodes": [
     {
       "id": "1",
-      "type": "Skill",
+      "typeId": "nt_skill",
       "properties": {
-        "name": "Python",
-        "category": "programming",
-        "description": "Язык программирования"
+        "f_name": "Python",
+        "f_category": "programming",
+        "f_description": "Язык программирования"
       },
       "position": {
         "x": 75,
@@ -293,8 +329,8 @@ npm run build
 ```
 
 - **id** — уникальный идентификатор узла
-- **type** — всегда `"Skill"` (в текущей версии)
-- **properties** — объект с данными, определяемыми схемой
+- **typeId** — ID типа узла из `schema.nodeTypes` (например: `nt_skill`)
+- **properties** — объект с данными, определяемыми схемой типа узла. Ключи — это ID полей, а значения — данные
 - **position** — объект `{ x, y }` с координатами визуализации
 
 #### Edges
@@ -306,7 +342,7 @@ npm run build
       "id": "e1",
       "source": "1",
       "target": "2",
-      "type": "includes",
+      "typeId": "et_includes",
       "properties": {}
     }
   ]
@@ -316,8 +352,8 @@ npm run build
 - **id** — уникальный идентификатор связи
 - **source** — id узла, из которого исходит связь
 - **target** — id узла, на который указывает связь
-- **type** — тип связи (должен быть определён в schema.edgeTypes)
-- **properties** — дополнительные данные связи
+- **typeId** — ID типа связи из `schema.edgeTypes` (например: `et_includes`)
+- **properties** — объект с дополнительными данными связи. Ключи — это ID полей типа связи, значения — данные
 
 ## Архитектура приложения
 
