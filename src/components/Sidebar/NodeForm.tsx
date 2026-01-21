@@ -11,6 +11,10 @@ export const NodeForm: React.FC = () => {
   const selectedNodeId = useOntologyStore((s) => s.selectedNodeId);
   const ontology = useOntologyStore((s) => s.ontology);
   const updateNode = useOntologyStore((s) => s.updateNode);
+  const collapseNode = useOntologyStore((s) => s.collapseNode);
+  const expandNode = useOntologyStore((s) => s.expandNode);
+
+  const collapsedNodes = useOntologyStore((s) => s.collapsedNodes);
 
   const node = ontology?.nodes.find((n) => n.id === selectedNodeId);
   const fields = node?.typeId ? (ontology?.schema.nodeTypes[node.typeId]?.fields ?? {}) : {};
@@ -129,6 +133,19 @@ export const NodeForm: React.FC = () => {
 
       <h4>Properties</h4>
       {Object.values(fields).map(renderField)}
+
+      <input
+        type="checkbox"
+        checked={collapsedNodes.has(node.id)}
+        onChange={(e) => {
+          if (e.target.checked) {
+            collapseNode(node.id);
+          } else {
+            expandNode(node.id);
+          }
+        }}
+      />
+      <label className={styles.label}>Collapsed</label>
 
       {hasErrors && <div className={styles.errorMessage}>Please fix validation errors</div>}
     </div>

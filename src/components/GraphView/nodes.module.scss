@@ -1,7 +1,7 @@
 @use '../../styles/variables';
 
 .node {
-  border: 1px solid transparent;
+  border: variables.$node-border;
   padding: 8px 12px;
   border-radius: 4px;
   background-color: variables.$node-bg-color;
@@ -10,13 +10,19 @@
     background-color 0.15s ease;
 
   &--selected {
-    border-color: variables.$node-border-color-selected;
+    border: variables.$node-border-selected;
     background-color: variables.$node-bg-color-selected;
     color: variables.$node-text-color-selected;
   }
 
   &--highlighted {
-    border-color: variables.$node-border-color-highlighted;
+    border: variables.$node-border-highlighted;
     background-color: variables.$node-bg-color-highlighted;
+  }
+
+  &--collapsed {
+    border: variables.$node-border-collapsed;
+    border-style: dashed;
+    background-color: variables.$node-bg-color-collapsed;
   }
 }

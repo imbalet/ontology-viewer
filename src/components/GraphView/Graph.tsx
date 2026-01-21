@@ -17,7 +17,7 @@ import { getNodeClassName } from './nodeStyles';
 import { getHighlights } from './highlightUtils';
 import { createDefaultValues } from '../../models/defaultValues';
 import styles from './Graph.module.scss';
-import type { Schema, Node } from '../../models/ontology';
+import type { Schema, Node, NodeId } from '../../models/ontology';
 import { createEmptyNode } from '../../models/createNode';
 import { useReactFlow } from 'reactflow';
 import { generateId } from '../../utils/id';
@@ -40,6 +40,8 @@ export const GraphView: React.FC = () => {
 
   const selectedNodeId = useOntologyStore((s) => s.selectedNodeId);
   const selectedEdgeId = useOntologyStore((s) => s.selectedEdgeId);
+
+  const collapsedNodes = useOntologyStore((s) => s.collapsedNodes);
 
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
@@ -68,6 +70,20 @@ export const GraphView: React.FC = () => {
   useEffect(() => {
     if (!ontology) return;
 
+    const hiddenNodeIds = new Set<NodeId>();
+    for (const rootId of collapsedNodes) {
+      const stack = [rootId];
+      while (stack.length) {
+        const current = stack.pop()!;
+        for (const e of ontology.edges) {
+          if (e.source === current && !hiddenNodeIds.has(e.target)) {
+            hiddenNodeIds.add(e.target);
+            stack.push(e.target);
+          }
+        }
+      }
+    }
+
     const { highlightedNodes, highlightedEdges } = getHighlights(
       ontology.nodes,
       ontology.edges,
@@ -76,32 +92,37 @@ export const GraphView: React.FC = () => {
     );
 
     setNodes(
-      ontology.nodes.map((n) => ({
-        id: n.id,
-        type: 'default',
-        data: { label: getNodeLabel(n, ontology.schema) },
-        position: n.position,
-        className: getNodeClassName({
-          selected: n.id === selectedNodeId,
-          highlighted: highlightedNodes.has(n.id),
-        }),
-      }))
+      ontology.nodes
+        .filter((n) => !hiddenNodeIds.has(n.id))
+        .map((n) => ({
+          id: n.id,
+          type: 'default',
+          data: { label: getNodeLabel(n, ontology.schema) },
+          position: n.position,
+          className: getNodeClassName({
+            selected: n.id === selectedNodeId,
+            highlighted: highlightedNodes.has(n.id),
+            collapsed: collapsedNodes.has(n.id),
+          }),
+        }))
     );
 
     setEdges(
-      ontology.edges.map((e) => ({
-        id: e.id,
-        source: e.source,
-        target: e.target,
-        ...edgeBehavior[ontology.schema.edgeTypes[e.typeId].name],
-        className: getEdgeClassName(ontology.schema.edgeTypes[e.typeId].name, {
-          selected: e.id === selectedEdgeId,
-          highlighted: highlightedEdges.has(e.id),
-        }),
-        label: ontology.schema.edgeTypes[e.typeId].name,
-      }))
+      ontology.edges
+        .filter((e) => !hiddenNodeIds.has(e.source) && !hiddenNodeIds.has(e.target))
+        .map((e) => ({
+          id: e.id,
+          source: e.source,
+          target: e.target,
+          ...edgeBehavior[ontology.schema.edgeTypes[e.typeId].name],
+          className: getEdgeClassName(ontology.schema.edgeTypes[e.typeId].name, {
+            selected: e.id === selectedEdgeId,
+            highlighted: highlightedEdges.has(e.id),
+          }),
+          label: ontology.schema.edgeTypes[e.typeId].name,
+        }))
     );
-  }, [ontology, selectedNodeId, selectedEdgeId]);
+  }, [ontology, selectedNodeId, selectedEdgeId, collapsedNodes]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {

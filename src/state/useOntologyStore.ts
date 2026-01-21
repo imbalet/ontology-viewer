@@ -49,6 +49,10 @@ interface OntologyState {
 
   undo: () => void;
   redo: () => void;
+
+  collapsedNodes: Set<NodeId>;
+  collapseNode: (nodeId: NodeId) => void;
+  expandNode: (nodeId: NodeId) => void;
 }
 
 const hasAllPositions = (nodes: Node[]) =>
@@ -82,6 +86,8 @@ export const useOntologyStore = create<OntologyState>((set) => ({
   selectedEdgeId: null,
   undoStack: [],
   redoStack: [],
+
+  collapsedNodes: new Set<NodeId>(),
 
   loadOntology: (data) =>
     set(() => {
@@ -261,5 +267,19 @@ export const useOntologyStore = create<OntologyState>((set) => ({
           : state.undoStack,
         redoStack: newRedo,
       };
+    }),
+
+  collapseNode: (nodeId) =>
+    set((state) => {
+      const newSet = new Set(state.collapsedNodes);
+      newSet.add(nodeId);
+      return { collapsedNodes: newSet };
+    }),
+
+  expandNode: (nodeId) =>
+    set((state) => {
+      const newSet = new Set(state.collapsedNodes);
+      newSet.delete(nodeId);
+      return { collapsedNodes: newSet };
     }),
 }));

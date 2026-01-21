@@ -53,26 +53,6 @@ export interface Schema {
   };
 }
 
-// export interface Schema {
-//   nodeTypes: {
-//     [nodeTypeId: string]: {
-//       name: string;
-//       fields: {
-//         [fieldId: string]: SchemaField;
-//       };
-//     };
-//   };
-//   edgeTypes: {
-//     [edgeTypeId: string]: {
-//       name: string;
-//       directed: boolean;
-//       fields: {
-//         [fieldId: string]: SchemaField;
-//       };
-//     };
-//   };
-// }
-
 export interface Ontology {
   schema: Schema;
   nodes: Node[];
