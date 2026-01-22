@@ -1,5 +1,6 @@
-import type { Node, SchemaField } from './ontology';
 import { createDefaultValues } from './defaultValues';
+
+import type { Node, SchemaField } from './ontology';
 
 export function createEmptyNode(
   id: string,

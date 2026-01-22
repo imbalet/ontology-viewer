@@ -1,5 +1,6 @@
 import dagre from 'dagre';
-import type { Node, Edge } from '../models/ontology';
+
+import type { Edge, Node } from '../models/ontology';
 
 export function applyAutoLayout(nodes: Node[], edges: Edge[]) {
   const g = new dagre.graphlib.Graph();

@@ -1,6 +1,9 @@
-import type { SchemaField, Ontology } from './ontology';
+import type { Ontology, PrimitiveValue, SchemaField } from './ontology';
 
-export function validateField(field: SchemaField, value: any): string | null {
+export function validateField(
+  field: SchemaField,
+  value: PrimitiveValue | undefined
+): string | null {
   if (field.required) {
     if (value === undefined || value === null || value === '') {
       return 'Required';
@@ -16,11 +19,13 @@ export function validateField(field: SchemaField, value: any): string | null {
   return null;
 }
 
-export function validateOntology(data: any): data is Ontology {
+export function validateOntology(data: unknown): data is Ontology {
   if (!data || typeof data !== 'object') return false;
-  if (!Array.isArray(data.nodes)) return false;
-  if (!Array.isArray(data.edges)) return false;
-  if (!data.schema || typeof data.schema !== 'object') return false;
+
+  const obj = data as Record<string, unknown>;
+  if (!Array.isArray(obj.nodes)) return false;
+  if (!Array.isArray(obj.edges)) return false;
+  if (!obj.schema || typeof obj.schema !== 'object') return false;
 
   return true;
 }

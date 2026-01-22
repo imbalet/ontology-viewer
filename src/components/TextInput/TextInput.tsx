@@ -1,5 +1,6 @@
-import React from 'react';
 import clsx from 'clsx';
+import React from 'react';
+
 import styles from './TextInput.module.scss';
 
 type InputType = 'text' | 'password' | 'email' | 'number' | 'search' | 'tel' | 'url';

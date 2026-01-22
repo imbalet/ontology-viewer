@@ -1,11 +1,14 @@
 import React, { useMemo } from 'react';
-import { useOntologyStore } from '../../state/useOntologyStore';
-import type { Node, SchemaField } from '../../models/ontology';
-import { validateField } from '../../models/validation';
-import { Select } from '../Select/Select';
-import { TextInput } from '../TextInput/TextInput';
+
 import styles from './NodeForm.module.scss';
 import { createDefaultValues } from '../../models/defaultValues';
+import { validateField } from '../../models/validation';
+import { useOntologyStore } from '../../state/useOntologyStore';
+import { Select } from '../Select/Select';
+import { TextInput } from '../TextInput/TextInput';
+
+import type { Node, PrimitiveValue, SchemaField } from '../../models/ontology';
+
 
 export const NodeForm: React.FC = () => {
   const selectedNodeId = useOntologyStore((s) => s.selectedNodeId);
@@ -18,9 +21,13 @@ export const NodeForm: React.FC = () => {
   const collapsedNodes = useOntologyStore((s) => s.collapsedNodes);
 
   const node = ontology?.nodes.find((n) => n.id === selectedNodeId);
-  const fields = node?.typeId ? (ontology?.schema.nodeTypes[node.typeId]?.fields ?? {}) : {};
 
   const isOntologyValid = ontology && hasHydrated;
+
+  const fields = useMemo(() => {
+    if (!node?.typeId) return {};
+    return ontology?.schema.nodeTypes[node.typeId]?.fields ?? {};
+  }, [node, ontology?.schema.nodeTypes]);
 
   const errors = useMemo(() => {
     if (!node) return {};
@@ -49,7 +56,7 @@ export const NodeForm: React.FC = () => {
     });
   };
 
-  const handleFieldChange = (field: SchemaField, value: any) => {
+  const handleFieldChange = (field: SchemaField, value: PrimitiveValue | undefined) => {
     const updatedNode: Node = {
       ...node,
       properties: {
@@ -74,7 +81,7 @@ export const NodeForm: React.FC = () => {
         {field.type === 'string' && (
           <TextInput
             variant={field.required ? 'required' : 'default'}
-            value={value}
+            value={value as string}
             onChange={(e) => handleFieldChange(field, e.target.value)}
           />
         )}
@@ -83,7 +90,7 @@ export const NodeForm: React.FC = () => {
           <TextInput
             variant={field.required ? 'required' : 'default'}
             type="number"
-            value={value}
+            value={value as number}
             onChange={(e) => {
               const val = e.target.value;
               handleFieldChange(field, val === '' ? '' : Number(val));
@@ -102,7 +109,7 @@ export const NodeForm: React.FC = () => {
         {field.type === 'enum' && (
           <Select
             variant={field.required ? 'required' : 'default'}
-            value={value}
+            value={value as string}
             onChange={(e) => handleFieldChange(field, e.target.value)}
           >
             <option value="">—</option>

@@ -1,27 +1,32 @@
-import React, { useEffect, useRef, type RefObject } from 'react';
+import React, { type RefObject, useEffect, useRef } from 'react';
 import ReactFlow, {
-  MiniMap,
-  Controls,
   Background,
-  useNodesState,
-  useEdgesState,
+  Controls,
+  MiniMap,
+  type OnConnect,
+  type OnConnectEnd,
+  type OnConnectStart,
   type Edge as RFEdge,
   type Node as RFNode,
-  type OnConnectStartParams,
+  useEdgesState,
+  useNodesState,
+  useReactFlow,
 } from 'reactflow';
-import 'reactflow/dist/style.css';
-import { useOntologyStore } from '../../state/useOntologyStore';
-import { ContextMenu } from '../ContextMenu/ContextMenu';
+
 import { edgeBehavior, getEdgeClassName } from './edgeStyles';
-import { getNodeClassName } from './nodeStyles';
-import { getHighlights } from './highlightUtils';
-import { createDefaultValues } from '../../models/defaultValues';
 import styles from './Graph.module.scss';
-import type { Schema, Node, NodeId } from '../../models/ontology';
+import { getHighlights } from './highlightUtils';
+import { getNodeClassName } from './nodeStyles';
 import { createEmptyNode } from '../../models/createNode';
-import { useReactFlow } from 'reactflow';
+import { createDefaultValues } from '../../models/defaultValues';
+import { useOntologyStore } from '../../state/useOntologyStore';
+import { getDefaultEdgeType, getDefaultNodeType } from '../../utils/defaultTypes';
 import { generateId } from '../../utils/id';
-import { getDefaultNodeType, getDefaultEdgeType } from '../../utils/defaultTypes';
+import { ContextMenu } from '../ContextMenu/ContextMenu';
+import 'reactflow/dist/style.css';
+
+
+import type { Node, NodeId, Schema } from '../../models/ontology';
 
 export const GraphView: React.FC = () => {
   const screenToFlowPosition = useReactFlow().screenToFlowPosition;
@@ -52,8 +57,8 @@ export const GraphView: React.FC = () => {
   const getNodeLabel = (node: Node, schema: Schema): string => {
     const schemaNodeType = schema.nodeTypes[node.typeId];
     const nameField = Object.values(schemaNodeType.fields).find((f) => f.name === 'name');
-    if (nameField?.type === 'string' && node.properties[nameField.id]?.trim()) {
-      return node.properties[nameField.id];
+    if (nameField?.type === 'string' && String(node.properties[nameField.id])?.trim()) {
+      return String(node.properties[nameField.id]);
     }
     const firstStringField = Object.values(schema.nodeTypes[node.typeId].fields).find(
       (f) => f.type === 'string'
@@ -123,7 +128,15 @@ export const GraphView: React.FC = () => {
           label: ontology.schema.edgeTypes[e.typeId].name,
         }))
     );
-  }, [ontology, selectedNodeId, selectedEdgeId, collapsedNodes]);
+  }, [
+    ontology,
+    selectedNodeId,
+    selectedEdgeId,
+    collapsedNodes,
+    isOntologyValid,
+    setNodes,
+    setEdges,
+  ]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -158,25 +171,33 @@ export const GraphView: React.FC = () => {
 
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [selectedNodeId, selectedEdgeId, removeNode, removeEdge]);
+  }, [
+    selectedNodeId,
+    selectedEdgeId,
+    removeNode,
+    removeEdge,
+    selectNode,
+    selectEdge,
+    closeContextMenu,
+  ]);
 
-  const onNodeDragStop = (_event: any, node: RFNode) => {
+  const onNodeDragStop = (_event: React.MouseEvent, node: RFNode) => {
     const n = ontology?.nodes.find((n) => n.id === node.id);
     if (!n) return;
 
     updateNode({ ...n, position: node.position });
   };
 
-  const onNodeClick = (_event: any, node: RFNode) => {
+  const onNodeClick = (_event: React.MouseEvent, node: RFNode) => {
     closeContextMenu();
     selectNode(node.id);
   };
-  const onEdgeClick = (_event: any, edge: RFEdge) => {
+  const onEdgeClick = (_event: React.MouseEvent, edge: RFEdge) => {
     closeContextMenu();
     selectEdge(edge.id);
   };
 
-  const onConnect = (params: any) => {
+  const onConnect: OnConnect = (params) => {
     if (!isOntologyValid) return;
     connectingNodeId.current = null;
 
@@ -188,6 +209,11 @@ export const GraphView: React.FC = () => {
 
     if (exists) {
       console.warn('Edge already exists:', params.source, '→', params.target);
+      return;
+    }
+
+    if (!params.source || !params.target) {
+      console.warn('Invalid connection parameters:', params);
       return;
     }
 
@@ -231,11 +257,11 @@ export const GraphView: React.FC = () => {
 
   const connectingNodeId: RefObject<string | null> = useRef(null);
 
-  const onConnectStart = (_event: any, params: OnConnectStartParams) => {
+  const onConnectStart: OnConnectStart = (_event, params) => {
     connectingNodeId.current = params.nodeId;
   };
 
-  const onConnectEndHandler = (event: MouseEvent | TouchEvent) => {
+  const onConnectEndHandler: OnConnectEnd = (event: MouseEvent | TouchEvent) => {
     if (!connectingNodeId.current || !isOntologyValid) return;
 
     const defaultNodeTypeId = getDefaultNodeType(ontology.schema);

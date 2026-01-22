@@ -1,8 +1,8 @@
-import { type Ontology, type Node, type Edge } from '../../models/ontology';
+import { type Edge, type Node, type Ontology } from '../../models/ontology';
 import { generateId } from '../id';
+import { getNodeSignature } from './nodeEquality';
 import { normalizeProperties } from './normalizeProperties';
 import { matchEdgeTypes } from './schemaMatch';
-import { getNodeSignature } from './nodeEquality';
 
 export const mergeOntology = (base: Ontology, incoming: Ontology): Ontology => {
   const edgeTypeMap = matchEdgeTypes(base.schema, incoming.schema);

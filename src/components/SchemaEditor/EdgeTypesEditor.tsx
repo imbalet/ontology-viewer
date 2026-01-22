@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { useOntologyStore } from '../../state/useOntologyStore';
-import type { SchemaField, Ontology } from '../../models/ontology';
-import { TextInput } from '../TextInput/TextInput';
-import { Button } from '../Button/Button';
-import { emptyField } from './schemaUtils';
-import { SchemaFieldEditor } from './SchemaFieldEditor';
+import React, { useEffect, useState } from 'react';
+
 import styles from './SchemaEditor.module.scss';
+import { SchemaFieldEditor } from './SchemaFieldEditor';
+import { emptyField } from './schemaUtils';
+import { useOntologyStore } from '../../state/useOntologyStore';
+import { Button } from '../Button/Button';
+import { TextInput } from '../TextInput/TextInput';
+
+import type { Ontology, SchemaField } from '../../models/ontology';
 
 interface Props {
   schema: Ontology['schema'];

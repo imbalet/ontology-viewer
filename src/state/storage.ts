@@ -1,5 +1,6 @@
-import type { Ontology, NodeId } from '../models/ontology';
 import { createJSONStorage } from 'zustand/middleware';
+
+import type { NodeId, Ontology } from '../models/ontology';
 
 export const STORAGE_VERSION = 1;
 
@@ -14,13 +15,9 @@ export type PersistedOntologyState = {
 };
 
 export const isSerializedSet = (value: unknown): value is SerializedSet => {
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    '__type' in value &&
-    (value as any).__type === 'Set' &&
-    Array.isArray((value as any).value)
-  );
+  if (typeof value !== 'object' || value === null) return false;
+  const obj = value as { __type?: unknown; value?: unknown };
+  return obj.__type === 'Set' && Array.isArray(obj.value);
 };
 
 export const storage = createJSONStorage<PersistedOntologyState>(() => localStorage, {

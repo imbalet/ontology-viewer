@@ -1,9 +1,11 @@
 import React, { useCallback, useRef } from 'react';
+
+import styles from './Toolbar.module.scss';
 import { useOntologyStore } from '../../state/useOntologyStore';
-import { importOntology, exportOntology } from '../../utils/jsonIO';
+import { exportOntology, importOntology } from '../../utils/jsonIO';
 import { applyAutoLayout } from '../../utils/layout';
 import { Button } from '../Button/Button';
-import styles from './Toolbar.module.scss';
+
 
 export const Toolbar: React.FC = () => {
   const loadOntology = useOntologyStore((s) => s.loadOntology);
@@ -14,6 +16,31 @@ export const Toolbar: React.FC = () => {
 
   const replaceInputRef = useRef<HTMLInputElement>(null);
   const mergeInputRef = useRef<HTMLInputElement>(null);
+
+  const confirmLoseOntology = () => {
+    const { ontology } = useOntologyStore.getState();
+
+    if (!ontology || ontology.nodes.length === 0) {
+      return true;
+    }
+
+    const wantContinue = window.confirm(
+      'The current ontology will be lost. Click OK to continue.\n\n' +
+        'It is recommended to export it first.'
+    );
+
+    if (!wantContinue) return false;
+
+    const wantExport = window.confirm(
+      'Do you want to export the current ontology before continuing?'
+    );
+
+    if (wantExport) {
+      exportOntology(ontology);
+    }
+
+    return true;
+  };
 
   const handleNew = useCallback(() => {
     if (!confirmLoseOntology()) return;
@@ -80,31 +107,6 @@ export const Toolbar: React.FC = () => {
     const newNodes = applyAutoLayout(ontology.nodes, ontology.edges);
     updateNodesWithHistory(newNodes);
   }, [updateNodesWithHistory]);
-
-  const confirmLoseOntology = () => {
-    const { ontology } = useOntologyStore.getState();
-
-    if (!ontology || ontology.nodes.length === 0) {
-      return true;
-    }
-
-    const wantContinue = window.confirm(
-      'The current ontology will be lost. Click OK to continue.\n\n' +
-        'It is recommended to export it first.'
-    );
-
-    if (!wantContinue) return false;
-
-    const wantExport = window.confirm(
-      'Do you want to export the current ontology before continuing?'
-    );
-
-    if (wantExport) {
-      exportOntology(ontology);
-    }
-
-    return true;
-  };
 
   return (
     <div className={styles.toolbar}>

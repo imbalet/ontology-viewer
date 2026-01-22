@@ -1,11 +1,11 @@
-import { type SchemaField } from '../../models/ontology';
 import { createDefaultValues } from '../../models/defaultValues';
+import { type PrimitiveValue, type SchemaField } from '../../models/ontology';
 
 export const normalizeProperties = (
-  incoming: Record<string, any>,
+  incoming: Record<string, PrimitiveValue | undefined>,
   schemaFields: Record<string, SchemaField>
-): Record<string, any> => {
-  const result: Record<string, any> = {};
+): Record<string, PrimitiveValue | undefined> => {
+  const result: Record<string, PrimitiveValue | undefined> = {};
   const defaults = createDefaultValues(schemaFields);
 
   for (const field of Object.values(schemaFields)) {

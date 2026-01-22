@@ -5,12 +5,13 @@ export type NodeTypeId = string;
 export type EdgeTypeId = string;
 
 export type FieldType = 'string' | 'number' | 'boolean' | 'enum';
+export type PrimitiveValue = string | number | boolean;
 
 export interface Node {
   id: NodeId;
   typeId: NodeTypeId;
   properties: {
-    [id: string]: any;
+    [id: string]: PrimitiveValue | undefined;
   };
   position: { x: number; y: number };
 }
@@ -21,7 +22,7 @@ export interface Edge {
   target: NodeId;
   typeId: EdgeTypeId;
   properties?: {
-    [id: string]: any;
+    [id: string]: PrimitiveValue | undefined;
   };
 }
 

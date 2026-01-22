@@ -1,7 +1,9 @@
-import { type SchemaField } from './ontology';
+import { type PrimitiveValue, type SchemaField } from './ontology';
 
-export function createDefaultValues(fields: Record<string, SchemaField>): Record<string, any> {
-  const defaults: Record<string, any> = {};
+export function createDefaultValues(
+  fields: Record<string, SchemaField>
+): Record<string, PrimitiveValue | undefined> {
+  const defaults: Record<string, PrimitiveValue | undefined> = {};
 
   for (const fieldId in fields) {
     const field = fields[fieldId];

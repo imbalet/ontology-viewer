@@ -1,7 +1,9 @@
 import React from 'react';
+
+import styles from './SchemaEditor.module.scss';
 import { Button } from '../Button/Button';
 import { TextInput } from '../TextInput/TextInput';
-import styles from './SchemaEditor.module.scss';
+
 
 interface Props {
   options?: string[];

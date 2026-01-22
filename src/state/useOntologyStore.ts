@@ -1,12 +1,15 @@
 import { create } from 'zustand';
-import type { Ontology, Node, Edge, NodeId, EdgeId } from '../models/ontology';
+import { persist } from 'zustand/middleware';
+
+import { type PersistedOntologyState, storage, STORAGE_VERSION } from './storage';
+import { createDefaultValues } from '../models/defaultValues';
+import { validateOntology } from '../models/validation';
+import { exportOntology } from '../utils/jsonIO';
 import { applyAutoLayout } from '../utils/layout';
 import { mergeOntology as mergeFn } from '../utils/ontologyMerge/mergeOntology';
-import { createDefaultValues } from '../models/defaultValues';
-import { persist } from 'zustand/middleware';
-import { exportOntology } from '../utils/jsonIO';
-import { validateOntology } from '../models/validation';
-import { STORAGE_VERSION, type PersistedOntologyState, storage } from './storage';
+
+
+import type { Edge, EdgeId, Node, NodeId, Ontology } from '../models/ontology';
 
 const MAX_HISTORY = 70;
 const HISTORY_DEBOUNCE_MS = 400;

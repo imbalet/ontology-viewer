@@ -1,6 +1,7 @@
-import React from 'react';
-import styles from './Button.module.scss';
 import clsx from 'clsx';
+import React from 'react';
+
+import styles from './Button.module.scss';
 
 type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: 'default' | 'danger';

@@ -1,11 +1,13 @@
 import React from 'react';
-import { useOntologyStore } from '../../state/useOntologyStore';
 import { useReactFlow } from 'reactflow';
+
+import styles from './ContextMenu.module.scss';
 import { createEmptyNode } from '../../models/createNode';
+import { useOntologyStore } from '../../state/useOntologyStore';
+import { getDefaultNodeType } from '../../utils/defaultTypes';
 import { generateId } from '../../utils/id';
 import { Button } from '../Button/Button';
-import styles from './ContextMenu.module.scss';
-import { getDefaultNodeType } from '../../utils/defaultTypes';
+
 
 export const ContextMenu: React.FC = () => {
   const contextMenu = useOntologyStore((s) => s.contextMenu);

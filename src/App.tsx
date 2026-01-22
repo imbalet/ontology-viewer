@@ -1,13 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { Toolbar } from './components/Toolbar/Toolbar';
-import { GraphView } from './components/GraphView/Graph';
-import { NodeForm } from './components/Sidebar/NodeForm';
-import { EdgeForm } from './components/Sidebar/EdgeForm';
-import { SchemaEditor } from './components/SchemaEditor/SchemaEditor';
-import { Button } from './components/Button/Button';
-import { useOntologyStore } from './state/useOntologyStore';
-import styles from './App.module.scss';
+import React, { useEffect, useState } from 'react';
 import { ReactFlowProvider } from 'reactflow';
+
+import styles from './App.module.scss';
+import { Button } from './components/Button/Button';
+import { GraphView } from './components/GraphView/Graph';
+import { SchemaEditor } from './components/SchemaEditor/SchemaEditor';
+import { EdgeForm } from './components/Sidebar/EdgeForm';
+import { NodeForm } from './components/Sidebar/NodeForm';
+import { Toolbar } from './components/Toolbar/Toolbar';
+import { useOntologyStore } from './state/useOntologyStore';
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'graph' | 'schema'>('graph');

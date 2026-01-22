@@ -1,7 +1,8 @@
-import { type Node, type Schema } from '../../models/ontology';
 import { normalizeProperties } from './normalizeProperties';
+import { type Node, type PrimitiveValue, type Schema } from '../../models/ontology';
 
-const stableStringify = (obj: Record<string, any>) =>
+
+const stableStringify = (obj: Record<string, PrimitiveValue | undefined>) =>
   JSON.stringify(
     Object.keys(obj)
       .sort()
@@ -10,7 +11,7 @@ const stableStringify = (obj: Record<string, any>) =>
           acc[key] = obj[key];
           return acc;
         },
-        {} as Record<string, any>
+        {} as Record<string, PrimitiveValue | undefined>
       )
   );
 

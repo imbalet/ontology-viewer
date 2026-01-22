@@ -1,11 +1,13 @@
 import React, { useMemo } from 'react';
-import { useOntologyStore } from '../../state/useOntologyStore';
-import { type SchemaField } from '../../models/ontology';
-import { validateField } from '../../models/validation';
-import { Select } from '../Select/Select';
-import { TextInput } from '../TextInput/TextInput';
+
 import styles from './EdgeForm.module.scss';
 import { createDefaultValues } from '../../models/defaultValues';
+import { type PrimitiveValue, type SchemaField } from '../../models/ontology';
+import { validateField } from '../../models/validation';
+import { useOntologyStore } from '../../state/useOntologyStore';
+import { Select } from '../Select/Select';
+import { TextInput } from '../TextInput/TextInput';
+
 
 export const EdgeForm: React.FC = () => {
   const ontology = useOntologyStore((s) => s.ontology);
@@ -20,7 +22,7 @@ export const EdgeForm: React.FC = () => {
   const fields = useMemo(() => {
     if (!edge || !isOntologyValid) return {};
     return ontology.schema.edgeTypes[edge.typeId]?.fields ?? {};
-  }, [ontology, edge]);
+  }, [ontology, edge, isOntologyValid]);
 
   const errors = useMemo(() => {
     if (!edge) return {};
@@ -48,7 +50,7 @@ export const EdgeForm: React.FC = () => {
     });
   };
 
-  const handleFieldChange = (field: SchemaField, value: any) => {
+  const handleFieldChange = (field: SchemaField, value: PrimitiveValue | undefined) => {
     updateEdge({
       ...edge,
       properties: {
@@ -72,7 +74,7 @@ export const EdgeForm: React.FC = () => {
         {field.type === 'string' && (
           <TextInput
             variant={field.required ? 'required' : 'default'}
-            value={value}
+            value={value as string}
             onChange={(e) => handleFieldChange(field, e.target.value)}
           />
         )}
@@ -81,7 +83,7 @@ export const EdgeForm: React.FC = () => {
           <TextInput
             variant={field.required ? 'required' : 'default'}
             type="number"
-            value={value}
+            value={value as number}
             onChange={(e) => {
               const val = e.target.value;
               handleFieldChange(field, val === '' ? '' : Number(val));
@@ -100,7 +102,7 @@ export const EdgeForm: React.FC = () => {
         {field.type === 'enum' && (
           <Select
             variant={field.required ? 'required' : 'default'}
-            value={value}
+            value={value as string}
             onChange={(e) => handleFieldChange(field, e.target.value)}
           >
             <option value="">—</option>

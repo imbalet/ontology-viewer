@@ -1,8 +1,9 @@
 import React from 'react';
-import { useOntologyStore } from '../../state/useOntologyStore';
-import { NodeTypesEditor } from './NodeTypesEditor';
+
 import { EdgeTypesEditor } from './EdgeTypesEditor';
+import { NodeTypesEditor } from './NodeTypesEditor';
 import styles from './SchemaEditor.module.scss';
+import { useOntologyStore } from '../../state/useOntologyStore';
 
 export const SchemaEditor: React.FC = () => {
   const schema = useOntologyStore((s) => s.ontology?.schema);

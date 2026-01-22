@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { TextInput } from '../TextInput/TextInput';
-import { Select } from '../Select/Select';
-import { Button } from '../Button/Button';
+
 import { EnumOptionsEditor } from './EnumOptionsEditor';
-import type { SchemaField, FieldType } from '../../models/ontology';
 import styles from './SchemaEditor.module.scss';
+import { Button } from '../Button/Button';
+import { Select } from '../Select/Select';
+import { TextInput } from '../TextInput/TextInput';
+
+
+import type { FieldType, SchemaField } from '../../models/ontology';
 
 interface Props {
   field: SchemaField;
@@ -17,7 +20,10 @@ export const SchemaFieldEditor: React.FC<Props> = ({ field, onChange, onRename, 
   const [editingValue, setEditingValue] = useState(field.name);
 
   useEffect(() => {
-    setEditingValue(field.name);
+    if (editingValue !== field.name) {
+      setEditingValue(field.name);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [field.name]);
 
   return (
