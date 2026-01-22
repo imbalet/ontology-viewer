@@ -1,4 +1,4 @@
-import { type SchemaField } from './ontology';
+import type { SchemaField, Ontology } from './ontology';
 
 export function validateField(field: SchemaField, value: any): string | null {
   if (field.required) {
@@ -14,4 +14,13 @@ export function validateField(field: SchemaField, value: any): string | null {
   }
 
   return null;
+}
+
+export function validateOntology(data: any): data is Ontology {
+  if (!data || typeof data !== 'object') return false;
+  if (!Array.isArray(data.nodes)) return false;
+  if (!Array.isArray(data.edges)) return false;
+  if (!data.schema || typeof data.schema !== 'object') return false;
+
+  return true;
 }

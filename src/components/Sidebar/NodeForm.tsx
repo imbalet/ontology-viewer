@@ -10,6 +10,7 @@ import { createDefaultValues } from '../../models/defaultValues';
 export const NodeForm: React.FC = () => {
   const selectedNodeId = useOntologyStore((s) => s.selectedNodeId);
   const ontology = useOntologyStore((s) => s.ontology);
+  const hasHydrated = useOntologyStore((s) => s._hasHydrated);
   const updateNode = useOntologyStore((s) => s.updateNode);
   const collapseNode = useOntologyStore((s) => s.collapseNode);
   const expandNode = useOntologyStore((s) => s.expandNode);
@@ -18,6 +19,8 @@ export const NodeForm: React.FC = () => {
 
   const node = ontology?.nodes.find((n) => n.id === selectedNodeId);
   const fields = node?.typeId ? (ontology?.schema.nodeTypes[node.typeId]?.fields ?? {}) : {};
+
+  const isOntologyValid = ontology && hasHydrated;
 
   const errors = useMemo(() => {
     if (!node) return {};
@@ -31,7 +34,7 @@ export const NodeForm: React.FC = () => {
 
   const hasErrors = useMemo(() => Object.values(errors).some(Boolean), [errors]);
 
-  if (!selectedNodeId || !ontology || !node) {
+  if (!isOntologyValid || !selectedNodeId || !node) {
     return null;
   }
 

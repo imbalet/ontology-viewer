@@ -27,6 +27,7 @@ export const GraphView: React.FC = () => {
   const screenToFlowPosition = useReactFlow().screenToFlowPosition;
   const reactFlowWrapperRef = useRef<HTMLDivElement>(null);
   const ontology = useOntologyStore((s) => s.ontology);
+  const hasHydrated = useOntologyStore((s) => s._hasHydrated);
   const selectNode = useOntologyStore((s) => s.selectNode);
   const selectEdge = useOntologyStore((s) => s.selectEdge);
   const addEdgeToStore = useOntologyStore((s) => s.addEdge);
@@ -46,7 +47,7 @@ export const GraphView: React.FC = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
-  const hasOntology = ontology !== null;
+  const isOntologyValid = ontology && hasHydrated;
 
   const getNodeLabel = (node: Node, schema: Schema): string => {
     const schemaNodeType = schema.nodeTypes[node.typeId];
@@ -68,7 +69,7 @@ export const GraphView: React.FC = () => {
   };
 
   useEffect(() => {
-    if (!ontology) return;
+    if (!isOntologyValid) return;
 
     const hiddenNodeIds = new Set<NodeId>();
     for (const rootId of collapsedNodes) {
@@ -176,7 +177,7 @@ export const GraphView: React.FC = () => {
   };
 
   const onConnect = (params: any) => {
-    if (!ontology) return;
+    if (!isOntologyValid) return;
     connectingNodeId.current = null;
 
     const defaultEdgeTypeId = getDefaultEdgeType(ontology.schema);
@@ -235,7 +236,7 @@ export const GraphView: React.FC = () => {
   };
 
   const onConnectEndHandler = (event: MouseEvent | TouchEvent) => {
-    if (!connectingNodeId.current || !ontology) return;
+    if (!connectingNodeId.current || !isOntologyValid) return;
 
     const defaultNodeTypeId = getDefaultNodeType(ontology.schema);
     const defaultEdgeTypeId = getDefaultEdgeType(ontology.schema);
@@ -275,7 +276,6 @@ export const GraphView: React.FC = () => {
       properties: createDefaultValues(ontology.schema.edgeTypes[defaultEdgeTypeId]?.fields || []),
     });
 
-    // selectNode(newNode.id);
     setTimeout(() => {
       selectNode(newNode.id);
     }, 0);
@@ -284,7 +284,7 @@ export const GraphView: React.FC = () => {
 
   return (
     <div ref={reactFlowWrapperRef} className={styles.container}>
-      {!hasOntology ? (
+      {!isOntologyValid ? (
         <div className={styles.noOntologyMessage}>Load ontology to view graph</div>
       ) : (
         <ReactFlow

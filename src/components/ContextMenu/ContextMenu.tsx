@@ -16,11 +16,13 @@ export const ContextMenu: React.FC = () => {
   const selectNode = useOntologyStore((s) => s.selectNode);
 
   const ontology = useOntologyStore((s) => s.ontology);
+  const hasHydrated = useOntologyStore((s) => s._hasHydrated);
+  const isOntologyValid = ontology && hasHydrated;
 
   const { project } = useReactFlow();
 
   if (!contextMenu) return null;
-  if (!ontology) return null;
+  if (!isOntologyValid) return null;
 
   const { type, targetId, position } = contextMenu;
 

@@ -9,13 +9,16 @@ import { createDefaultValues } from '../../models/defaultValues';
 
 export const EdgeForm: React.FC = () => {
   const ontology = useOntologyStore((s) => s.ontology);
+  const hasHydrated = useOntologyStore((s) => s._hasHydrated);
   const selectedEdgeId = useOntologyStore((s) => s.selectedEdgeId);
   const updateEdge = useOntologyStore((s) => s.updateEdge);
 
   const edge = ontology?.edges.find((e) => e.id === selectedEdgeId);
 
+  const isOntologyValid = ontology && hasHydrated;
+
   const fields = useMemo(() => {
-    if (!ontology || !edge) return {};
+    if (!edge || !isOntologyValid) return {};
     return ontology.schema.edgeTypes[edge.typeId]?.fields ?? {};
   }, [ontology, edge]);
 
@@ -31,7 +34,7 @@ export const EdgeForm: React.FC = () => {
 
   const hasErrors = useMemo(() => Object.values(errors).some(Boolean), [errors]);
 
-  if (!ontology || !selectedEdgeId || !edge) {
+  if (!isOntologyValid || !selectedEdgeId || !edge) {
     return null;
   }
 
