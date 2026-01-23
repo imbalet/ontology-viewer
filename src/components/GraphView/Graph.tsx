@@ -25,7 +25,6 @@ import { generateId } from '../../utils/id';
 import { ContextMenu } from '../ContextMenu/ContextMenu';
 import 'reactflow/dist/style.css';
 
-
 import type { Node, NodeId, Schema } from '../../models/ontology';
 
 export const GraphView: React.FC = () => {
@@ -48,6 +47,7 @@ export const GraphView: React.FC = () => {
   const selectedEdgeId = useOntologyStore((s) => s.selectedEdgeId);
 
   const collapsedNodes = useOntologyStore((s) => s.collapsedNodes);
+  const hiddenEdgeTypes = useOntologyStore((s) => s.hiddenEdgeTypes);
 
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
@@ -115,7 +115,12 @@ export const GraphView: React.FC = () => {
 
     setEdges(
       ontology.edges
-        .filter((e) => !hiddenNodeIds.has(e.source) && !hiddenNodeIds.has(e.target))
+        .filter(
+          (e) =>
+            !hiddenNodeIds.has(e.source) &&
+            !hiddenNodeIds.has(e.target) &&
+            !hiddenEdgeTypes.has(e.typeId)
+        )
         .map((e) => ({
           id: e.id,
           source: e.source,
@@ -134,6 +139,7 @@ export const GraphView: React.FC = () => {
     selectedEdgeId,
     collapsedNodes,
     isOntologyValid,
+    hiddenEdgeTypes,
     setNodes,
     setEdges,
   ]);

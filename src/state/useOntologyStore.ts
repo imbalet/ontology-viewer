@@ -8,7 +8,6 @@ import { exportOntology } from '../utils/jsonIO';
 import { applyAutoLayout } from '../utils/layout';
 import { mergeOntology as mergeFn } from '../utils/ontologyMerge/mergeOntology';
 
-
 import type { Edge, EdgeId, Node, NodeId, Ontology } from '../models/ontology';
 
 const MAX_HISTORY = 70;
@@ -64,6 +63,10 @@ interface OntologyState {
 
   collapseNode: (nodeId: NodeId) => void;
   expandNode: (nodeId: NodeId) => void;
+
+  hiddenEdgeTypes: Set<string>;
+  hideEdgeType: (typeId: string) => void;
+  showEdgeType: (typeId: string) => void;
 }
 
 const hasAllPositions = (nodes: Node[]) =>
@@ -97,6 +100,7 @@ export const useOntologyStore = create<OntologyState>()(
       undoStack: [],
       redoStack: [],
       collapsedNodes: new Set<NodeId>(),
+      hiddenEdgeTypes: new Set<string>(),
 
       loadOntology: (data) =>
         set(() => {
@@ -275,6 +279,20 @@ export const useOntologyStore = create<OntologyState>()(
           const newSet = new Set(state.collapsedNodes);
           newSet.delete(nodeId);
           return { collapsedNodes: newSet };
+        }),
+
+      hideEdgeType: (typeId) =>
+        set((state) => {
+          const newSet = new Set(state.hiddenEdgeTypes);
+          newSet.add(typeId);
+          return { hiddenEdgeTypes: newSet };
+        }),
+
+      showEdgeType: (typeId) =>
+        set((state) => {
+          const newSet = new Set(state.hiddenEdgeTypes);
+          newSet.delete(typeId);
+          return { hiddenEdgeTypes: newSet };
         }),
 
       _hasHydrated: false,

@@ -17,6 +17,10 @@ export const EdgeTypesEditor: React.FC<Props> = ({ schema }) => {
   const updateSchema = useOntologyStore((s) => s.updateSchema);
   const { edgeTypes: edgeTypes } = schema;
 
+  const hiddenEdgeTypes = useOntologyStore((s) => s.hiddenEdgeTypes);
+  const hideEdgeType = useOntologyStore((s) => s.hideEdgeType);
+  const showEdgeType = useOntologyStore((s) => s.showEdgeType);
+
   const [editingTypes, setEditingTypes] = useState<Record<string, string>>(() =>
     Object.fromEntries(Object.entries(edgeTypes).map(([id, cfg]) => [id, cfg.name]))
   );
@@ -111,6 +115,15 @@ export const EdgeTypesEditor: React.FC<Props> = ({ schema }) => {
                     onChange={(e) => updateEdgeType(id, { directed: e.target.checked })}
                   />
                   directed
+                </label>
+
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={hiddenEdgeTypes.has(id)}
+                    onChange={(e) => (e.target.checked ? hideEdgeType(id) : showEdgeType(id))}
+                  />
+                  hide
                 </label>
 
                 <Button onClick={() => removeEdgeType(id)}>🗑</Button>
