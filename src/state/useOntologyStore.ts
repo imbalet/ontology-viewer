@@ -21,7 +21,7 @@ interface ContextMenuState {
 
 interface OntologyState {
   ontology: Ontology | null;
-  selectedNodeId: NodeId | null;
+  selectedNodeIds: string[];
   selectedEdgeId: EdgeId | null;
 
   undoStack: Ontology[];
@@ -45,8 +45,9 @@ interface OntologyState {
   updateNodesWithHistory: (newNodes: Node[]) => void;
   updateEdgesWithHistory: (newEdges: Edge[]) => void;
 
-  selectNode: (nodeId?: NodeId) => void;
-  selectEdge: (edgeId?: NodeId) => void;
+  selectNode: (nodeId: NodeId) => void;
+  setSelectedNodeIds: (ids: string[]) => void;
+  selectEdge: (edgeId: EdgeId | null) => void;
 
   contextMenu: ContextMenuState | null;
   openContextMenu: (
@@ -95,7 +96,7 @@ export const useOntologyStore = create<OntologyState>()(
   persist<OntologyState, [], [], PersistedOntologyState>(
     (set) => ({
       ontology: null,
-      selectedNodeId: null,
+      selectedNodeIds: [],
       selectedEdgeId: null,
       undoStack: [],
       redoStack: [],
@@ -219,8 +220,10 @@ export const useOntologyStore = create<OntologyState>()(
           return { ...state, ...pushHistory(state, newOntology) };
         }),
 
-      selectNode: (nodeId) => set({ selectedNodeId: nodeId ?? null, selectedEdgeId: null }),
-      selectEdge: (edgeId) => set({ selectedEdgeId: edgeId ?? null, selectedNodeId: null }),
+      selectNode: (nodeId) =>
+        set({ selectedNodeIds: nodeId ? [nodeId] : [], selectedEdgeId: null }),
+      setSelectedNodeIds: (ids: string[]) => set({ selectedNodeIds: ids }),
+      selectEdge: (edgeId) => set({ selectedEdgeId: edgeId ?? null, selectedNodeIds: [] }),
 
       contextMenu: null,
       openContextMenu: (type, targetId, position) =>

@@ -1,9 +1,10 @@
 import { type Edge, type Node } from '../../models/ontology';
+import { getSelectedOneNodeId } from '../../utils/selectedOneNode';
 
 export function getHighlights(
   nodes: Node[],
   edges: Edge[],
-  selectedNodeId: string | null,
+  selectedNodeIds: string[],
   selectedEdgeId: string | null
 ) {
   const highlightedNodes = new Set<string>();
@@ -12,6 +13,7 @@ export function getHighlights(
   const nodesMap = new Map(nodes.map((n) => [n.id, n]));
   const edgesMap = new Map(edges.map((e) => [e.id, e]));
 
+  const selectedNodeId = getSelectedOneNodeId(selectedNodeIds);
   const selectedNode = selectedNodeId ? nodesMap.get(selectedNodeId) : null;
   const selectedEdge = selectedEdgeId ? edgesMap.get(selectedEdgeId) : null;
 

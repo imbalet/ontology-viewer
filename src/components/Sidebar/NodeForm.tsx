@@ -4,14 +4,14 @@ import styles from './NodeForm.module.scss';
 import { createDefaultValues } from '../../models/defaultValues';
 import { validateField } from '../../models/validation';
 import { useOntologyStore } from '../../state/useOntologyStore';
+import { getSelectedOneNodeId } from '../../utils/selectedOneNode';
 import { Select } from '../Select/Select';
 import { TextInput } from '../TextInput/TextInput';
 
 import type { Node, PrimitiveValue, SchemaField } from '../../models/ontology';
 
-
 export const NodeForm: React.FC = () => {
-  const selectedNodeId = useOntologyStore((s) => s.selectedNodeId);
+  const selectedNodeIds = useOntologyStore((s) => s.selectedNodeIds);
   const ontology = useOntologyStore((s) => s.ontology);
   const hasHydrated = useOntologyStore((s) => s._hasHydrated);
   const updateNode = useOntologyStore((s) => s.updateNode);
@@ -20,6 +20,7 @@ export const NodeForm: React.FC = () => {
 
   const collapsedNodes = useOntologyStore((s) => s.collapsedNodes);
 
+  const selectedNodeId = getSelectedOneNodeId(selectedNodeIds);
   const node = ontology?.nodes.find((n) => n.id === selectedNodeId);
 
   const isOntologyValid = ontology && hasHydrated;
@@ -41,7 +42,7 @@ export const NodeForm: React.FC = () => {
 
   const hasErrors = useMemo(() => Object.values(errors).some(Boolean), [errors]);
 
-  if (!isOntologyValid || !selectedNodeId || !node) {
+  if (!isOntologyValid || !selectedNodeIds || !node) {
     return null;
   }
 

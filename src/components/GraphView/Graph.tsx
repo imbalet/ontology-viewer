@@ -3,11 +3,12 @@ import ReactFlow, {
   Background,
   Controls,
   MiniMap,
+  type Node as RFNode,
   type OnConnect,
   type OnConnectEnd,
   type OnConnectStart,
-  type Edge as RFEdge,
-  type Node as RFNode,
+  type OnSelectionChangeParams,
+  PanOnScrollMode,
   useEdgesState,
   useNodesState,
   useReactFlow,
@@ -22,6 +23,7 @@ import { createDefaultValues } from '../../models/defaultValues';
 import { useOntologyStore } from '../../state/useOntologyStore';
 import { getDefaultEdgeType, getDefaultNodeType } from '../../utils/defaultTypes';
 import { generateId } from '../../utils/id';
+import { getSelectedOneNodeId } from '../../utils/selectedOneNode';
 import { ContextMenu } from '../ContextMenu/ContextMenu';
 import 'reactflow/dist/style.css';
 
@@ -34,6 +36,7 @@ export const GraphView: React.FC = () => {
   const hasHydrated = useOntologyStore((s) => s._hasHydrated);
   const selectNode = useOntologyStore((s) => s.selectNode);
   const selectEdge = useOntologyStore((s) => s.selectEdge);
+  const setSelectedNodeIds = useOntologyStore((s) => s.setSelectedNodeIds);
   const addEdgeToStore = useOntologyStore((s) => s.addEdge);
   const updateNode = useOntologyStore((s) => s.updateNode);
   const addNode = useOntologyStore((s) => s.addNode);
@@ -43,7 +46,7 @@ export const GraphView: React.FC = () => {
   const openContextMenu = useOntologyStore((s) => s.openContextMenu);
   const closeContextMenu = useOntologyStore((s) => s.closeContextMenu);
 
-  const selectedNodeId = useOntologyStore((s) => s.selectedNodeId);
+  const selectedNodeIds = useOntologyStore((s) => s.selectedNodeIds);
   const selectedEdgeId = useOntologyStore((s) => s.selectedEdgeId);
 
   const collapsedNodes = useOntologyStore((s) => s.collapsedNodes);
@@ -90,13 +93,6 @@ export const GraphView: React.FC = () => {
       }
     }
 
-    const { highlightedNodes, highlightedEdges } = getHighlights(
-      ontology.nodes,
-      ontology.edges,
-      selectedNodeId,
-      selectedEdgeId
-    );
-
     setNodes(
       ontology.nodes
         .filter((n) => !hiddenNodeIds.has(n.id))
@@ -105,11 +101,6 @@ export const GraphView: React.FC = () => {
           type: 'default',
           data: { label: getNodeLabel(n, ontology.schema) },
           position: n.position,
-          className: getNodeClassName({
-            selected: n.id === selectedNodeId,
-            highlighted: highlightedNodes.has(n.id),
-            collapsed: collapsedNodes.has(n.id),
-          }),
         }))
     );
 
@@ -125,21 +116,48 @@ export const GraphView: React.FC = () => {
           id: e.id,
           source: e.source,
           target: e.target,
-          ...edgeBehavior[ontology.schema.edgeTypes[e.typeId].name],
-          className: getEdgeClassName(ontology.schema.edgeTypes[e.typeId].name, {
-            selected: e.id === selectedEdgeId,
-            highlighted: highlightedEdges.has(e.id),
-          }),
           label: ontology.schema.edgeTypes[e.typeId].name,
+          ...edgeBehavior[ontology.schema.edgeTypes[e.typeId].name],
         }))
     );
+  }, [ontology, isOntologyValid, collapsedNodes, hiddenEdgeTypes, setNodes, setEdges]);
+
+  useEffect(() => {
+    if (!isOntologyValid) return;
+
+    const { highlightedNodes, highlightedEdges } = getHighlights(
+      ontology.nodes,
+      ontology.edges,
+      selectedNodeIds,
+      selectedEdgeId
+    );
+
+    setNodes((prev) =>
+      prev.map((n) => ({
+        ...n,
+        className: getNodeClassName({
+          selected: selectedNodeIds.includes(n.id),
+          highlighted: highlightedNodes.has(n.id),
+          collapsed: collapsedNodes.has(n.id),
+        }),
+      }))
+    );
+
+    setEdges((prev) =>
+      prev.map((e) => ({
+        ...e,
+        className: getEdgeClassName(e.label as string, {
+          highlighted: highlightedEdges.has(e.id),
+          selected: e.id === selectedEdgeId,
+        }),
+      }))
+    );
   }, [
-    ontology,
-    selectedNodeId,
+    selectedNodeIds,
     selectedEdgeId,
     collapsedNodes,
+    ontology,
     isOntologyValid,
-    hiddenEdgeTypes,
     setNodes,
     setEdges,
   ]);
@@ -153,14 +171,15 @@ export const GraphView: React.FC = () => {
 
       if (e.key === 'Escape') {
         e.preventDefault();
-        selectNode(undefined);
-        selectEdge(undefined);
+        setSelectedNodeIds([]);
+        selectEdge(null);
         closeContextMenu();
         return;
       }
 
       if (e.key !== 'Delete' && e.key !== 'Backspace') return;
 
+      const selectedNodeId = getSelectedOneNodeId(selectedNodeIds);
       if (selectedNodeId) {
         e.preventDefault();
         const ok = window.confirm('Delete selected node? All connected edges will be removed.');
@@ -178,29 +197,21 @@ export const GraphView: React.FC = () => {
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, [
-    selectedNodeId,
+    selectedNodeIds,
     selectedEdgeId,
     removeNode,
     removeEdge,
     selectNode,
     selectEdge,
     closeContextMenu,
+    setSelectedNodeIds,
   ]);
 
-  const onNodeDragStop = (_event: React.MouseEvent, node: RFNode) => {
-    const n = ontology?.nodes.find((n) => n.id === node.id);
-    if (!n) return;
-
-    updateNode({ ...n, position: node.position });
-  };
-
-  const onNodeClick = (_event: React.MouseEvent, node: RFNode) => {
+  const onNodeClick = (_event: React.MouseEvent) => {
     closeContextMenu();
-    selectNode(node.id);
   };
-  const onEdgeClick = (_event: React.MouseEvent, edge: RFEdge) => {
+  const onEdgeClick = (_event: React.MouseEvent) => {
     closeContextMenu();
-    selectEdge(edge.id);
   };
 
   const onConnect: OnConnect = (params) => {
@@ -249,8 +260,8 @@ export const GraphView: React.FC = () => {
   }
 
   const onPaneClick = () => {
-    selectNode(undefined);
-    selectEdge(undefined);
+    setSelectedNodeIds([]);
+    selectEdge(null);
     closeContextMenu();
   };
 
@@ -314,6 +325,63 @@ export const GraphView: React.FC = () => {
     connectingNodeId.current = null;
   };
 
+  const onSelectionChange = (params: OnSelectionChangeParams) => {
+    const nodeIds = params.nodes.map((n) => n.id);
+    const edgeId = params.edges[0]?.id || null;
+    const store = useOntologyStore.getState();
+
+    if (
+      nodeIds.length !== store.selectedNodeIds.length ||
+      nodeIds.some((id, i) => id !== store.selectedNodeIds[i])
+    ) {
+      setSelectedNodeIds(nodeIds);
+    }
+
+    if (edgeId !== store.selectedEdgeId) {
+      selectEdge(edgeId);
+    }
+  };
+
+  // const dragPositionsRef = useRef<Map<string, XYPosition>>(new Map());
+
+  // const onNodesChangeWithPositionSync = (changes: NodeChange[]) => {
+  //   onNodesChange(changes);
+
+  //   if (!ontology) return;
+
+  //   changes.forEach((change) => {
+  //     if (change.type === 'position' && change.position) {
+  //       dragPositionsRef.current.set(change.id, change.position);
+  //     }
+
+  //     if (change.type === 'position' && change.dragging === false) {
+  //       dragPositionsRef.current.forEach((pos, id) => {
+  //         const node = ontology.nodes.find((n) => n.id === id);
+  //         if (!node) return;
+
+  //         updateNode({
+  //           ...node,
+  //           position: pos,
+  //         });
+  //         setTimeout(() => {
+  //           console.log('After drag position sync, selected node ids set to:', [id]);
+  //           setSelectedNodeIds([id]);
+  //         }, 2);
+  //       });
+  //       dragPositionsRef.current.clear();
+  //     }
+  //   });
+  // };
+
+  const onNodeDragStop = (_event: React.MouseEvent, node: RFNode) => {
+    const n = ontology?.nodes.find((n) => n.id === node.id);
+    if (!n) return;
+
+    if (n.position.x === node.position.x && n.position.y === node.position.y) return;
+
+    updateNode({ ...n, position: node.position });
+  };
+
   return (
     <div ref={reactFlowWrapperRef} className={styles.container}>
       {!isOntologyValid ? (
@@ -323,6 +391,8 @@ export const GraphView: React.FC = () => {
           nodes={nodes}
           edges={edges}
           onNodesChange={onNodesChange}
+          onNodeDragStop={onNodeDragStop}
+          // onNodesChange={onNodesChangeWithPositionSync}
           onEdgesChange={onEdgesChange}
           onNodeClick={onNodeClick}
           onEdgeClick={onEdgeClick}
@@ -332,11 +402,22 @@ export const GraphView: React.FC = () => {
           onPaneClick={onPaneClick}
           onMoveStart={onMoveStart}
           onConnect={onConnect}
-          onNodeDragStop={onNodeDragStop}
           onNodeDragStart={onNodeDragStart}
           onConnectStart={onConnectStart}
           onConnectEnd={onConnectEndHandler}
           fitView
+          // selection
+          selectionOnDrag
+          onSelectionChange={onSelectionChange}
+          selectionKeyCode={['Shift', 'Meta', 'Control']}
+          // pan
+          // panOnScroll
+          panOnScrollMode={PanOnScrollMode.Free}
+          panOnDrag={[2]}
+          // zoom
+          zoomOnPinch
+          zoomOnScroll={true}
+          zoomActivationKeyCode={['Control', 'Meta']}
         >
           <MiniMap className={styles.miniMap} />
           <Controls className={styles.controls} />
