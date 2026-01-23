@@ -1,26 +1,28 @@
 @use '../../styles/variables';
 
-.node {
-  border: variables.$node-border;
-  padding: 8px 12px;
-  border-radius: 4px;
-  background-color: variables.$node-bg-color;
-  transition:
-    border 0.15s ease,
-    background-color 0.15s ease;
+:global(.react-flow__node) {
+  &.node {
+    border: variables.$node-border;
+    padding: 8px 12px;
+    border-radius: 4px;
+    background-color: variables.$node-bg-color;
+    transition:
+      border 0.15s ease,
+      background-color 0.15s ease;
+  }
 
-  &--selected {
+  &.node--selected {
     border: variables.$node-border-selected;
     background-color: variables.$node-bg-color-selected;
     color: variables.$node-text-color-selected;
   }
 
-  &--highlighted {
+  &.node--highlighted {
     border: variables.$node-border-highlighted;
     background-color: variables.$node-bg-color-highlighted;
   }
 
-  &--collapsed {
+  &.node--collapsed {
     border: variables.$node-border-collapsed;
     border-style: dashed;
     background-color: variables.$node-bg-color-collapsed;
