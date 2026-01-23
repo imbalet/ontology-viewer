@@ -1,7 +1,6 @@
 import { normalizeProperties } from './normalizeProperties';
 import { type Node, type PrimitiveValue, type Schema } from '../../models/ontology';
 
-
 const stableStringify = (obj: Record<string, PrimitiveValue | undefined>) =>
   JSON.stringify(
     Object.keys(obj)

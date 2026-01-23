@@ -8,7 +8,6 @@ import { getDefaultNodeType } from '../../utils/defaultTypes';
 import { generateId } from '../../utils/id';
 import { Button } from '../Button/Button';
 
-
 export const ContextMenu: React.FC = () => {
   const contextMenu = useOntologyStore((s) => s.contextMenu);
   const closeMenu = useOntologyStore((s) => s.closeContextMenu);

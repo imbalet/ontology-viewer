@@ -4,7 +4,6 @@ import styles from './SchemaEditor.module.scss';
 import { Button } from '../Button/Button';
 import { TextInput } from '../TextInput/TextInput';
 
-
 interface Props {
   options?: string[];
   onChange: (options: string[]) => void;

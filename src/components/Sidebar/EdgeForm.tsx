@@ -8,7 +8,6 @@ import { useOntologyStore } from '../../state/useOntologyStore';
 import { Select } from '../Select/Select';
 import { TextInput } from '../TextInput/TextInput';
 
-
 export const EdgeForm: React.FC = () => {
   const ontology = useOntologyStore((s) => s.ontology);
   const hasHydrated = useOntologyStore((s) => s._hasHydrated);

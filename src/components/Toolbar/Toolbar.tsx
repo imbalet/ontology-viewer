@@ -6,7 +6,6 @@ import { exportOntology, importOntology } from '../../utils/jsonIO';
 import { applyAutoLayout } from '../../utils/layout';
 import { Button } from '../Button/Button';
 
-
 export const Toolbar: React.FC = () => {
   const loadOntology = useOntologyStore((s) => s.loadOntology);
   const mergeOntology = useOntologyStore((s) => s.mergeOntology);
