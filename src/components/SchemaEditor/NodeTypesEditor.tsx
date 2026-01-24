@@ -34,7 +34,7 @@ export const NodeTypesEditor: React.FC<Props> = ({ schema }) => {
         ...s,
         nodeTypes: {
           ...s.nodeTypes,
-          [id]: { name: 'New Node', directed: true, fields: {} },
+          [id]: { name: 'New Node', fields: {} },
         },
       };
     });
@@ -42,7 +42,7 @@ export const NodeTypesEditor: React.FC<Props> = ({ schema }) => {
 
   const updateNodeType = (
     id: string,
-    patch: Partial<{ name: string; directed: boolean; fields: Record<string, SchemaField> }>
+    patch: Partial<{ name: string; fields: Record<string, SchemaField> }>
   ) => {
     updateSchema((s) => ({
       ...s,
