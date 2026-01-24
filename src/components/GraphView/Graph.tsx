@@ -3,7 +3,6 @@ import ReactFlow, {
   Background,
   Controls,
   MiniMap,
-  type Node as RFNode,
   type OnConnect,
   type OnConnectEnd,
   type OnConnectStart,
@@ -12,6 +11,8 @@ import ReactFlow, {
   useEdgesState,
   useNodesState,
   useReactFlow,
+  type XYPosition,
+  type NodeChange,
 } from 'reactflow';
 
 import { edgeBehavior, getEdgeClassName } from './edgeStyles';
@@ -101,6 +102,7 @@ export const GraphView: React.FC = () => {
           type: 'default',
           data: { label: getNodeLabel(n, ontology.schema) },
           position: n.position,
+          selected: selectedNodeIds.includes(n.id),
         }))
     );
 
@@ -117,6 +119,7 @@ export const GraphView: React.FC = () => {
           source: e.source,
           target: e.target,
           label: ontology.schema.edgeTypes[e.typeId].name,
+          selected: e.id === selectedEdgeId,
           ...edgeBehavior[ontology.schema.edgeTypes[e.typeId].name],
         }))
     );
@@ -342,45 +345,42 @@ export const GraphView: React.FC = () => {
     }
   };
 
-  // const dragPositionsRef = useRef<Map<string, XYPosition>>(new Map());
+  const dragPositionsRef = useRef<Map<string, XYPosition>>(new Map());
 
-  // const onNodesChangeWithPositionSync = (changes: NodeChange[]) => {
-  //   onNodesChange(changes);
+  const onNodesChangeWithPositionSync = (changes: NodeChange[]) => {
+    onNodesChange(changes);
 
-  //   if (!ontology) return;
+    if (!ontology) return;
 
-  //   changes.forEach((change) => {
-  //     if (change.type === 'position' && change.position) {
-  //       dragPositionsRef.current.set(change.id, change.position);
-  //     }
+    changes.forEach((change) => {
+      if (change.type === 'position' && change.position) {
+        dragPositionsRef.current.set(change.id, change.position);
+      }
 
-  //     if (change.type === 'position' && change.dragging === false) {
-  //       dragPositionsRef.current.forEach((pos, id) => {
-  //         const node = ontology.nodes.find((n) => n.id === id);
-  //         if (!node) return;
+      if (change.type === 'position' && change.dragging === false) {
+        dragPositionsRef.current.forEach((pos, id) => {
+          const node = ontology.nodes.find((n) => n.id === id);
+          if (!node) return;
 
-  //         updateNode({
-  //           ...node,
-  //           position: pos,
-  //         });
-  //         setTimeout(() => {
-  //           console.log('After drag position sync, selected node ids set to:', [id]);
-  //           setSelectedNodeIds([id]);
-  //         }, 2);
-  //       });
-  //       dragPositionsRef.current.clear();
-  //     }
-  //   });
-  // };
-
-  const onNodeDragStop = (_event: React.MouseEvent, node: RFNode) => {
-    const n = ontology?.nodes.find((n) => n.id === node.id);
-    if (!n) return;
-
-    if (n.position.x === node.position.x && n.position.y === node.position.y) return;
-
-    updateNode({ ...n, position: node.position });
+          updateNode({
+            ...node,
+            position: pos,
+          });
+        });
+        dragPositionsRef.current.clear();
+      }
+    });
   };
+
+  // const onNodeDragStop = (_event: React.MouseEvent, node: RFNode) => {
+  //   console.log('Node drag stopped for node:', node.id);
+  //   const n = ontology?.nodes.find((n) => n.id === node.id);
+  //   if (!n) return;
+
+  //   if (n.position.x === node.position.x && n.position.y === node.position.y) return;
+
+  //   updateNode({ ...n, position: node.position });
+  // };
 
   return (
     <div ref={reactFlowWrapperRef} className={styles.container}>
@@ -390,9 +390,9 @@ export const GraphView: React.FC = () => {
         <ReactFlow
           nodes={nodes}
           edges={edges}
-          onNodesChange={onNodesChange}
-          onNodeDragStop={onNodeDragStop}
-          // onNodesChange={onNodesChangeWithPositionSync}
+          // onNodesChange={onNodesChange}
+          // onNodeDragStop={onNodeDragStop}
+          onNodesChange={onNodesChangeWithPositionSync}
           onEdgesChange={onEdgesChange}
           onNodeClick={onNodeClick}
           onEdgeClick={onEdgeClick}
